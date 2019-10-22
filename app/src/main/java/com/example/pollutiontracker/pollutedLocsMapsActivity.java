@@ -10,6 +10,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -22,11 +25,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class pollutedLocsMapsActivity extends FragmentActivity
         implements OnMapReadyCallback
 {
 
     private GoogleMap mMap;
+    LinearLayout list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,14 +61,25 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 
         // Add a marker in Sydney and move the camera
         //marker's url: https://www.flaticon.com/free-icon/placeholder_149060
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions()
-                .position(sydney)
-                .title("Marker in Sydney")
-                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_blue_marker_32dp))
-                .flat(true));
+        ArrayList<Double> lat = new ArrayList<>(Arrays.asList( 24.367350, 24.368346, 24.366773));
+        ArrayList<Double> lng = new ArrayList<>(Arrays.asList( 88.636055, 88.638465, 88.639275));
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        ArrayList<LatLng> latLngs = new ArrayList<>();
+        for (int i=0; i<lat.size(); i++) {
+            latLngs.add(new LatLng( lat.get(i), lng.get(i) ));
+            Log.i("LatLngs","New location: "+latLngs.get(i).latitude+", "+latLngs.get(i).longitude);
+        }
+
+        for (LatLng point : latLngs) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(point)
+                    .title("A Marker in Rajshahi")
+                    .icon(bitmapDescriptorFromVector(this, R.drawable.ic_blue_marker_32dp))
+                    .flat(true));
+        }
+
+        LatLng rajshahi = new LatLng(24.367350, 88.636055);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(rajshahi));
 
         /*mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
@@ -78,14 +96,17 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 
             }
         });*/
+
     }
 
-    //Check permissions
+
+
+    /*//Check permissions
     private void checkPermission(){
         if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
-    }
+    }*/
 
     //bitmapDescriptor method to convert vectorAsset to bitmap
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {

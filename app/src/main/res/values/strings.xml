@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">PollutionTracker</string>
+
+    <!--Pollution types-->
+    <string name="pollution_type_air">Air</string>
+    <string name="pollution_type_water">Water</string>
+    <string name="pollution_type_noise">Noise</string>
+    <string name="pollution_type_land">Land</string>
+    <string name="pollution_type_others">Others</string>
+
+    <string name="report_pollution">Report pollution</string>
 </resources>
