@@ -33,6 +33,116 @@
 
         <LinearLayout
             android:id="@+id/listLinearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:orientation="horizontal"
+            android:padding="-2dp"
+            map:layout_constraintBottom_toBottomOf="parent"
+            map:layout_constraintEnd_toEndOf="parent"
+            map:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/imageViewAir"
+                android:layout_width="8dp"
+                android:layout_height="match_parent"
+                android:background="#2196F3"
+                android:src="@drawable/blank_shape_0x0_hxw" />
+
+            <TextView
+                android:id="@+id/textViewAir"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="13dp"
+                android:text="@string/pollution_type_air" />
+
+            <ImageView
+                android:id="@+id/imageViewWater"
+                android:layout_width="8dp"
+                android:layout_height="match_parent"
+                android:background="#2196F3"
+                android:src="@drawable/blank_shape_0x0_hxw" />
+
+            <TextView
+                android:id="@+id/textViewWater"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="13dp"
+                android:text="@string/pollution_type_water" />
+
+            <ImageView
+                android:id="@+id/imageViewNoise"
+                android:layout_width="8dp"
+                android:layout_height="match_parent"
+                android:background="#2196F3"
+                android:src="@drawable/blank_shape_0x0_hxw" />
+
+            <TextView
+                android:id="@+id/textViewNoise"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="13dp"
+                android:text="@string/pollution_type_noise" />
+
+            <ImageView
+                android:id="@+id/imageViewLand"
+                android:layout_width="8dp"
+                android:layout_height="match_parent"
+                android:background="#2196F3"
+                android:src="@drawable/blank_shape_0x0_hxw" />
+
+            <TextView
+                android:id="@+id/textViewLand"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="13dp"
+                android:text="@string/pollution_type_land" />
+
+            <ImageView
+                android:id="@+id/imageViewOthers"
+                android:layout_width="8dp"
+                android:layout_height="match_parent"
+                android:background="#2196F3"
+                android:src="@drawable/blank_shape_0x0_hxw" />
+
+            <TextView
+                android:id="@+id/textViewOthers"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="0dp"
+                android:text="@string/pollution_type_others" />
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>
+
+<!--
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/map"
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:context=".pollutedLocsMapsActivity" />
+-->
+<!--
+    https://www.flaticon.com/free-icon/vertical-line_1625#term=vertical%20line&page=1&position=13
+-->
+<!--
+<LinearLayout
+            android:id="@+id/listLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
@@ -121,19 +231,4 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5" />
         </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</FrameLayout>
-
-<!--
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    tools:context=".pollutedLocsMapsActivity" />
-    -->
-<!--
-    https://www.flaticon.com/free-icon/vertical-line_1625#term=vertical%20line&page=1&position=13-->
+-->

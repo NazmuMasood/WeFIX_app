@@ -79,7 +79,8 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         }
 
         LatLng rajshahi = new LatLng(24.367350, 88.636055);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(rajshahi));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(rajshahi));
+        moveToCurrentLocation(rajshahi);
 
         /*mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
@@ -107,6 +108,16 @@ public class pollutedLocsMapsActivity extends FragmentActivity
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
     }*/
+
+
+    private void moveToCurrentLocation(LatLng currentLocation)
+    {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
+        // Zoom in, animating the camera.
+        mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        // Zoom out to zoom level 10, animating with a duration of 2 seconds.
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+    }
 
     //bitmapDescriptor method to convert vectorAsset to bitmap
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
