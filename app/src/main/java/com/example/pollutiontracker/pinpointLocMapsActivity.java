@@ -3,17 +3,14 @@ package com.example.pollutiontracker;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.WindowManager;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,27 +19,27 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-public class pollutedLocsMapsActivity extends FragmentActivity
-        implements OnMapReadyCallback
-{
+public class pinpointLocMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    LinearLayout list;
+    EditText locationET; Button confirmLocationButton; ImageButton gpsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_polluted_locs_maps);
+        setContentView(R.layout.activity_pinpoint_loc_maps);
+
+        locationET = findViewById(R.id.locationET);
+        confirmLocationButton = findViewById(R.id.confirmLocButton);
+        gpsButton = findViewById(R.id.gpsImgButton);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.map1);
         mapFragment.getMapAsync(this);
+
     }
 
     @Override
@@ -50,36 +47,41 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        //marker's url: https://www.flaticon.com/free-icon/placeholder_149060
-        ArrayList<Double> lat = new ArrayList<>(Arrays.asList( 24.367350, 24.368346, 24.366773));
-        ArrayList<Double> lng = new ArrayList<>(Arrays.asList( 88.636055, 88.638465, 88.639275));
+        LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions()
+                .position(sydney)
+                .title("A Marker in Sydney")
+                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_blue_marker_32dp))
+                .flat(true));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        moveToCurrentLocation(sydney);
 
-        ArrayList<LatLng> latLngs = new ArrayList<>();
-        for (int i=0; i<lat.size(); i++) {
-            latLngs.add(new LatLng( lat.get(i), lng.get(i) ));
-            Log.i("LatLngs","New location: "+latLngs.get(i).latitude+", "+latLngs.get(i).longitude);
-        }
+        /*mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {}
 
-        for (LatLng point : latLngs) {
-            mMap.addMarker(new MarkerOptions()
-                    .position(point)
-                    .title("A Marker in Rajshahi")
-                    .icon(bitmapDescriptorFromVector(this, R.drawable.ic_blue_marker_32dp))
-                    .flat(true));
-        }
+            @Override
+            public void onMarkerDrag(Marker marker) {}
 
-        LatLng rajshahi = new LatLng(24.367350, 88.636055);
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(rajshahi));
-        moveToCurrentLocation(rajshahi);
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+
+                LatLng newLoc = marker.getPosition();
+                toaster.shortToast("New location: "+newLoc.latitude+", "+newLoc.longitude,
+                       pinpointLocMapsActivity.this);
+
+            }
+        });*/
     }
 
+    //Method to zoom in to location
     private void moveToCurrentLocation(LatLng currentLocation)
     {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
         // Zoom in, animating the camera.
         mMap.animateCamera(CameraUpdateFactory.zoomIn());
         // Zoom out to zoom level 10, animating with a duration of 2 seconds.
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 4000, null);
     }
 
     //bitmapDescriptor method to convert vectorAsset to bitmap
@@ -91,5 +93,4 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
-
 }

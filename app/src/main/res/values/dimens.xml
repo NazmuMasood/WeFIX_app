@@ -2,6 +2,5 @@
 <resources>
     <!--Pollution type indicator legend-->
     <dimen name="marker_legend_width">8dp</dimen>
-    <dimen name="marker_legend_height">match_parent</dimen>
 
 </resources>
