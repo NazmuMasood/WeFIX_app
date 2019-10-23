@@ -59,6 +59,7 @@
                 android:background="@android:color/white"
                 android:ems="10"
                 android:hint="@string/loading_location"
+                android:cursorVisible="false"
                 android:inputType="textPersonName"
                 android:paddingStart="5dp" />
 

@@ -19,6 +19,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class pinpointLocMapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -32,6 +33,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements OnMapRe
         setContentView(R.layout.activity_pinpoint_loc_maps);
 
         locationET = findViewById(R.id.locationET);
+        locationET.setFocusableInTouchMode(false);
+        locationET.clearFocus();
         confirmLocationButton = findViewById(R.id.confirmLocButton);
         gpsButton = findViewById(R.id.gpsImgButton);
 
@@ -51,12 +54,13 @@ public class pinpointLocMapsActivity extends FragmentActivity implements OnMapRe
         mMap.addMarker(new MarkerOptions()
                 .position(sydney)
                 .title("A Marker in Sydney")
-                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_blue_marker_32dp))
-                .flat(true));
+                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_32dp))
+                .flat(true))
+                .setDraggable(true);
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         moveToCurrentLocation(sydney);
 
-        /*mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {}
 
@@ -67,11 +71,12 @@ public class pinpointLocMapsActivity extends FragmentActivity implements OnMapRe
             public void onMarkerDragEnd(Marker marker) {
 
                 LatLng newLoc = marker.getPosition();
-                toaster.shortToast("New location: "+newLoc.latitude+", "+newLoc.longitude,
+                String newLocString = newLoc.latitude+", "+newLoc.longitude;
+                toaster.shortToast("New location: "+newLocString,
                        pinpointLocMapsActivity.this);
-
+                locationET.setText(newLocString);
             }
-        });*/
+        });
     }
 
     //Method to zoom in to location
