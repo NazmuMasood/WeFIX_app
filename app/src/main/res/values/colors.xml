@@ -3,4 +3,12 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <!--Pollution type indicator legend-->
+    <color name="colorAir">#2196F3</color>
+    <color name="colorWater">#2196F3</color>
+    <color name="colorNoise">#2196F3</color>
+    <color name="colorLand">#2196F3</color>
+    <color name="colorOthers">#2196F3</color>
+
 </resources>

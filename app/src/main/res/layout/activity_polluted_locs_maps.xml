@@ -44,9 +44,9 @@
 
             <ImageView
                 android:id="@+id/imageViewAir"
-                android:layout_width="8dp"
-                android:layout_height="match_parent"
-                android:background="#2196F3"
+                android:layout_width="@dimen/marker_legend_width"
+                android:layout_height="@dimen/marker_legend_height"
+                android:background="@color/colorAir"
                 android:src="@drawable/blank_shape_0x0_hxw" />
 
             <TextView
@@ -60,9 +60,9 @@
 
             <ImageView
                 android:id="@+id/imageViewWater"
-                android:layout_width="8dp"
-                android:layout_height="match_parent"
-                android:background="#2196F3"
+                android:layout_width="@dimen/marker_legend_width"
+                android:layout_height="@dimen/marker_legend_height"
+                android:background="@color/colorWater"
                 android:src="@drawable/blank_shape_0x0_hxw" />
 
             <TextView
@@ -76,9 +76,9 @@
 
             <ImageView
                 android:id="@+id/imageViewNoise"
-                android:layout_width="8dp"
-                android:layout_height="match_parent"
-                android:background="#2196F3"
+                android:layout_width="@dimen/marker_legend_width"
+                android:layout_height="@dimen/marker_legend_height"
+                android:background="@color/colorNoise"
                 android:src="@drawable/blank_shape_0x0_hxw" />
 
             <TextView
@@ -92,9 +92,9 @@
 
             <ImageView
                 android:id="@+id/imageViewLand"
-                android:layout_width="8dp"
-                android:layout_height="match_parent"
-                android:background="#2196F3"
+                android:layout_width="@dimen/marker_legend_width"
+                android:layout_height="@dimen/marker_legend_height"
+                android:background="@color/colorLand"
                 android:src="@drawable/blank_shape_0x0_hxw" />
 
             <TextView
@@ -108,9 +108,9 @@
 
             <ImageView
                 android:id="@+id/imageViewOthers"
-                android:layout_width="8dp"
-                android:layout_height="match_parent"
-                android:background="#2196F3"
+                android:layout_width="@dimen/marker_legend_width"
+                android:layout_height="@dimen/marker_legend_height"
+                android:background="@color/colorOthers"
                 android:src="@drawable/blank_shape_0x0_hxw" />
 
             <TextView

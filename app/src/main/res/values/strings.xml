@@ -7,6 +7,7 @@
     <string name="pollution_type_noise">Noise</string>
     <string name="pollution_type_land">Land</string>
     <string name="pollution_type_others">Others</string>
-
+    <!--Report pollution button -->
     <string name="report_pollution">Report pollution</string>
+
 </resources>
