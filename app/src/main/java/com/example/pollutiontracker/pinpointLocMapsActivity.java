@@ -1,17 +1,50 @@
 package com.example.pollutiontracker;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -21,11 +54,28 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
-public class pinpointLocMapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
+public class pinpointLocMapsActivity extends FragmentActivity implements
+        OnMapReadyCallback
+        //,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+{
     private GoogleMap mMap;
     EditText locationET; Button confirmLocationButton; ImageButton gpsButton;
+
+    //create this at top of onCreate
+    //first try
+    private FusedLocationProviderClient mFusedLocationClient;
+    GoogleApiClient mGoogleApiClient;
+    LocationRequest mLocationRequest;
+    Location gpsLoc, markerLoc; Boolean firstTime = true;
+    Marker marker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,28 +87,43 @@ public class pinpointLocMapsActivity extends FragmentActivity implements OnMapRe
         locationET.clearFocus();
         confirmLocationButton = findViewById(R.id.confirmLocButton);
         gpsButton = findViewById(R.id.gpsImgButton);
+        gpsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                firstTime = true;
+                Loc_Update();
+            }
+        });
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map1);
         mapFragment.getMapAsync(this);
 
+        //first try
+        //ADD THIS LINE
+        mFusedLocationClient  = getFusedLocationProviderClient(this);
+        buildGoogleApiClient();
+        createLocationRequest();
+        Loc_Update();
+        //...
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        //mMap.setMyLocationEnabled(true);
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
+        /*LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions()
                 .position(sydney)
-                .title("A Marker in Sydney")
+                .title("I'm here")
                 .icon(bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_32dp))
                 .flat(true))
                 .setDraggable(true);
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        moveToCurrentLocation(sydney);
+        moveToCurrentLocation(sydney);*/
 
         mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
@@ -71,13 +136,193 @@ public class pinpointLocMapsActivity extends FragmentActivity implements OnMapRe
             public void onMarkerDragEnd(Marker marker) {
 
                 LatLng newLoc = marker.getPosition();
-                String newLocString = newLoc.latitude+", "+newLoc.longitude;
-                toaster.shortToast("New location: "+newLocString,
-                       pinpointLocMapsActivity.this);
+
+                Location temp = new Location(LocationManager.GPS_PROVIDER);
+                temp.setLatitude(newLoc.latitude);
+                temp.setLongitude(newLoc.longitude);
+                markerLoc = temp;
+
+                String newLocString = markerLoc.getLatitude()+", "+markerLoc.getLongitude();
                 locationET.setText(newLocString);
             }
         });
+
     }
+
+    //First try- stackoverflow
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        toast("googleClient connected");
+                        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    if (location!=null){
+                                        toast("mFusedLocation getLastLocation");
+                                        LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+                                        locationET.setText(location.getLatitude()+", "+location.getLongitude());
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        //LOG
+                    }
+                })
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(30000);
+        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+
+    private void Loc_Update() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(this).checkLocationSettings(builder.build());
+        task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+                    if (ContextCompat.checkSelfPermission(pinpointLocMapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                        mFusedLocationClient.requestLocationUpdates(mLocationRequest,new LocationCallback(){
+                            @Override
+                            public void onLocationResult(LocationResult locationResult) {
+                                for (Location location : locationResult.getLocations()) {
+                                    //Do what you want with location
+                                    //like update camera
+                                    gpsLoc = location;
+                                    //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16f));
+                                    //locationET.setText(location.getLatitude()+", "+location.getLongitude());
+                                    //toast("loc_update");
+                                    moveToGPSLocation();
+                                }
+
+                            }
+                        },null);
+
+                    }
+                } catch (ApiException exception) {
+                    switch (exception.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            // Location settings are not satisfied. But could be fixed by showing the
+                            // user a dialog.
+                            try {
+                                // Cast to a resolvable exception.
+                                ResolvableApiException resolvable = (ResolvableApiException) exception;
+                                // Show the dialog by calling startResolutionForResult(),
+                                // and check the result in onActivityResult().
+                                resolvable.startResolutionForResult(pinpointLocMapsActivity.this, 2001);
+                                break;
+                            } catch (IntentSender.SendIntentException e) {
+                                // Ignore the error.
+                            } catch (ClassCastException e) {
+                                // Ignore, should be an impossible error.
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            // Location settings are not satisfied. However, we have no way to fix the
+                            // settings so we won't show the dialog.
+
+                            break;
+                    }
+                }}
+        });//task-listener
+        //builder.setAlwaysShow(true);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+
+        switch (resultCode) {
+            case Activity.RESULT_OK:
+                // All required changes were successfully made
+                toast("User permitted gps on");
+                Loc_Update();
+                break;
+            case Activity.RESULT_CANCELED:
+                // The user was asked to change settings, but chose not to
+                toast("User denied gps on");
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void moveToGPSLocation(){
+        if(firstTime) {
+            Location location = gpsLoc;
+            if (location != null) {
+                markerLoc = gpsLoc;
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16f));
+                if (marker==null) {
+                    marker = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()))
+                            .title("I'm here")
+                            .icon(bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_32dp))
+                            .flat(true))
+                    ;
+                    marker.setDraggable(true);
+                }
+                else {
+                    marker.setPosition(new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()));
+                }
+                locationET.setText(markerLoc.getLatitude() + ", " + markerLoc.getLongitude());
+            }
+            firstTime = false;
+        }
+    }
+    //First try end
+
+    private void toast(String message) {
+        try {
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
+    /*//Check if location permission on
+    int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean checkPermissions(){
+        return (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION){
+            if (grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                getMyLocation();
+            }else {
+                toaster.shortToast("Grant location permission to access this feature",
+                        pinpointLocMapsActivity.this);
+                Intent intent =  new Intent(this, MainActivity.class);
+                startActivity(intent);
+            }
+        }
+    }
+    */
+
 
     //Method to zoom in to location
     private void moveToCurrentLocation(LatLng currentLocation)
@@ -88,7 +333,6 @@ public class pinpointLocMapsActivity extends FragmentActivity implements OnMapRe
         // Zoom out to zoom level 10, animating with a duration of 2 seconds.
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 4000, null);
     }
-
     //bitmapDescriptor method to convert vectorAsset to bitmap
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
@@ -98,4 +342,19 @@ public class pinpointLocMapsActivity extends FragmentActivity implements OnMapRe
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
+
+    /*@Override
+    protected void onResume() {
+        super.onResume();
+        //setUpMapIfNeeded();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }*/
 }
