@@ -161,10 +161,10 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                                 @Override
                                 public void onSuccess(Location location) {
                                     if (location!=null){
-                                        toast("mFusedLocation getLastLocation");
-                                        LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
-                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
-                                        locationET.setText(location.getLatitude()+", "+location.getLongitude());
+                                        //toast("mFusedLocation getLastLocation");
+                                        //LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+                                        //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+                                        //locationET.setText(location.getLatitude()+", "+location.getLongitude());
                                     }
                                 }
                             });
