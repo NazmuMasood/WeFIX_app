@@ -422,7 +422,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         if (userHandledFirstGpsPrompt) {
             locationET.setText("Location unavailable. Please try again...");
             if (!activeNetwork()){
-                toast("No internet connection. Please try again...");
+                toaster.longToast("No internet connection. Please try again...",
+                        pinpointLocMapsActivity.this);
             }
         }
 
