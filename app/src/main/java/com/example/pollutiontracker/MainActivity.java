@@ -43,13 +43,17 @@ public class MainActivity extends AppCompatActivity {
         pinpointLocButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkPermission()) {
-                    Intent intent = new Intent(MainActivity.this, pinpointLocMapsActivity.class);
-                    startActivity(intent);
+                if (activeNetwork()) {
+                    if (checkPermission()) {
+                        Intent intent = new Intent(MainActivity.this, pinpointLocMapsActivity.class);
+                        startActivity(intent);
+                    } else {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    }
                 }
                 else {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                            PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    toaster.shortToast("No internet connection. Please try again..", MainActivity.this);
                 }
             }
         });

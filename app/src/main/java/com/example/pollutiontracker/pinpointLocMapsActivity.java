@@ -19,6 +19,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -179,6 +181,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 temp.setLongitude(midLatLng.longitude);
                 markerLoc = temp;
 
+                locationET.getText().clear();
+
                 /*String newLocString = markerLoc.getLatitude()+", "+markerLoc.getLongitude();
                 locationET.setText(newLocString);*/
                 String address = getAddressFromLocation(markerLoc);
@@ -186,7 +190,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                     locationET.setText(address);
                 }
                 else {
-                    locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
+                    //locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
                 }
 
                 //Zoom-in to location if too much zoomed-out
@@ -368,6 +372,9 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
             if (location != null) {
                 markerLoc = gpsLoc;
 
+                // "Loading location..." <-- locationET hint
+                locationET.getText().clear();
+
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude()
                         , location.getLongitude()), 16f));
 
@@ -376,7 +383,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                     locationET.setText(address);
                 }
                 else {
-                    locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
+                    //locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
                 }
             }
             allowLocUpdt = false;
@@ -405,10 +412,20 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 return addressToDisp;
             }
             else {
+                locationET.setText("Location unavailable. Please try again...");
                 return null;
             }
         }
         catch (Exception e){e.printStackTrace();}
+
+        //toast("Internet is unstable. Please try again..");
+        if (userHandledFirstGpsPrompt) {
+            locationET.setText("Location unavailable. Please try again...");
+            if (!activeNetwork()){
+                toast("No internet connection. Please try again...");
+            }
+        }
+
         return null;
     }
     //First try end
@@ -464,6 +481,13 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
+    public boolean activeNetwork () {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnected();
+        return isConnected;
+    }
+
     /*@Override
     protected void onResume() {
         super.onResume();
@@ -477,5 +501,10 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
+    }*/
+
+    /*@Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }*/
 }
