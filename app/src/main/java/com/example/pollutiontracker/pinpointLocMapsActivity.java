@@ -79,7 +79,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
     Location gpsLoc, markerLoc;
-    Boolean firstTime = true, tooZoomedOut = false;
+    Boolean allowLocUpdt = true, tooZoomedOut = false, userHandledFirstGpsPrompt=false;
     Geocoder geocoder;
     List<Address> addresses;
 
@@ -105,7 +105,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         gpsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                firstTime = true;
+                allowLocUpdt = true;
                 Loc_Update();
             }
         });
@@ -164,6 +164,9 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
             }
         });*/
 
+        toaster.longToast("Please drag map to set location..",
+                pinpointLocMapsActivity.this);
+
         //Map cameraMovedListener
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
@@ -188,8 +191,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
 
                 //Zoom-in to location if too much zoomed-out
                 float zoom = mMap.getCameraPosition().zoom;
-                toast("zoom : "+zoom+"f");
-                if (zoom<16f){
+                //toast("zoom : "+zoom+"f");
+                if (zoom<16.5f){
                     tooZoomedOut = true;
                     confirmLocationButton.setText("Pinpoint location");
                 }
@@ -208,7 +211,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
                     public void onConnected(@Nullable Bundle bundle) {
-                        toast("googleClient connected");
+                        //toast("googleClient connected");
                         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                                 @Override
@@ -304,17 +307,55 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
 
+        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
         switch (resultCode) {
             case Activity.RESULT_OK:
                 // All required changes were successfully made
                 toast("User permitted gps on");
+
+                userHandledFirstGpsPrompt = true;
+
                 Loc_Update();
                 break;
             case Activity.RESULT_CANCELED:
                 // The user was asked to change settings, but chose not to
                 toast("User denied gps on");
+
+                //Very first time when activity starts and user cancels turn-on-gps prompt
+                if (!userHandledFirstGpsPrompt) {
+                    if (ContextCompat.checkSelfPermission(pinpointLocMapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                if (location != null) { //Last location available
+                                    toast("last location ");
+                                    gpsLoc = location;
+                                    moveToGPSLocation();
+
+                                } else { //No last location available
+                                    toast("custom location");
+                                    LatLng shaplaChottorLatLng = new LatLng(23.726623, 90.421576);
+
+                                    Location temp = new Location(LocationManager.GPS_PROVIDER);
+                                    temp.setLatitude(shaplaChottorLatLng.latitude);
+                                    temp.setLongitude(shaplaChottorLatLng.longitude);
+
+                                    gpsLoc = temp; markerLoc = temp;
+
+                                    //This is called only once when activity just started and user denied GPS..
+                                    //..which gives a whole zoomed-out view of the country
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(markerLoc.getLatitude()
+                                            , markerLoc.getLongitude()), 6.5f));
+
+                                    tooZoomedOut = true;
+                                }
+                                userHandledFirstGpsPrompt = true;
+                            }
+                        });
+                    }
+                }
+
                 break;
             default:
                 break;
@@ -322,11 +363,13 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     }
 
     private void moveToGPSLocation(){
-        if(firstTime) {
+        if(allowLocUpdt) {
             Location location = gpsLoc;
             if (location != null) {
                 markerLoc = gpsLoc;
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16f));
+
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude()
+                        , location.getLongitude()), 16f));
 
                 String address = getAddressFromLocation(markerLoc);
                 if (address!=null){
@@ -336,7 +379,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                     locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
                 }
             }
-            firstTime = false;
+            allowLocUpdt = false;
         }
     }
 
