@@ -4,8 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -23,8 +26,13 @@ public class MainActivity extends AppCompatActivity {
         locationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, pollutedLocsMapsActivity.class);
-                startActivity(intent);
+                if(activeNetwork()) {
+                    Intent intent = new Intent(MainActivity.this, pollutedLocsMapsActivity.class);
+                    startActivity(intent);
+                }
+                else {
+                    toaster.shortToast("No internet connection. Please try again..", MainActivity.this);
+                }
             }
         });
 
@@ -68,4 +76,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public boolean activeNetwork () {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnected();
+
+        return isConnected;
+    }
 }

@@ -113,7 +113,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        //mMap.setMyLocationEnabled(true);
+        mMap.setMyLocationEnabled(true);
         // Add a marker in Sydney and move the camera
         /*LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions()
@@ -125,7 +125,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         moveToCurrentLocation(sydney);*/
 
-        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+        //Marker onDragListener
+        /*mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {}
 
@@ -140,6 +141,23 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 Location temp = new Location(LocationManager.GPS_PROVIDER);
                 temp.setLatitude(newLoc.latitude);
                 temp.setLongitude(newLoc.longitude);
+                markerLoc = temp;
+
+                String newLocString = markerLoc.getLatitude()+", "+markerLoc.getLongitude();
+                locationET.setText(newLocString);
+            }
+        });*/
+
+        //Map cameraMovedListener
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                //get LatLng at the center by calling
+                LatLng midLatLng = mMap.getCameraPosition().target;
+
+                Location temp = new Location(LocationManager.GPS_PROVIDER);
+                temp.setLatitude(midLatLng.latitude);
+                temp.setLongitude(midLatLng.longitude);
                 markerLoc = temp;
 
                 String newLocString = markerLoc.getLatitude()+", "+markerLoc.getLongitude();
@@ -274,7 +292,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
             if (location != null) {
                 markerLoc = gpsLoc;
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16f));
-                if (marker==null) {
+                /*if (marker==null) {
                     marker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()))
                             .title("I'm here")
@@ -285,7 +303,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 }
                 else {
                     marker.setPosition(new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()));
-                }
+                }*/
                 locationET.setText(markerLoc.getLatitude() + ", " + markerLoc.getLongitude());
             }
             firstTime = false;
