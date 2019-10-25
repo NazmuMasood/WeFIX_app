@@ -15,6 +15,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -59,6 +61,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.List;
+import java.util.Locale;
+
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 public class pinpointLocMapsActivity extends FragmentActivity implements
@@ -74,8 +79,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
     Location gpsLoc, markerLoc; Boolean firstTime = true;
-    Marker marker;
-
+    Geocoder geocoder;
+    List<Address> addresses;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +119,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
         // Add a marker in Sydney and move the camera
         /*LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions()
@@ -160,8 +166,15 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 temp.setLongitude(midLatLng.longitude);
                 markerLoc = temp;
 
-                String newLocString = markerLoc.getLatitude()+", "+markerLoc.getLongitude();
-                locationET.setText(newLocString);
+                /*String newLocString = markerLoc.getLatitude()+", "+markerLoc.getLongitude();
+                locationET.setText(newLocString);*/
+                String address = getAddressFromLocation(markerLoc);
+                if (address!=null){
+                    locationET.setText(address);
+                }
+                else {
+                    locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
+                }
             }
         });
 
@@ -292,22 +305,46 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
             if (location != null) {
                 markerLoc = gpsLoc;
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16f));
-                /*if (marker==null) {
-                    marker = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()))
-                            .title("I'm here")
-                            .icon(bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_32dp))
-                            .flat(true))
-                    ;
-                    marker.setDraggable(true);
+
+                String address = getAddressFromLocation(markerLoc);
+                if (address!=null){
+                    locationET.setText(address);
                 }
                 else {
-                    marker.setPosition(new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()));
-                }*/
-                locationET.setText(markerLoc.getLatitude() + ", " + markerLoc.getLongitude());
+                    locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
+                }
             }
             firstTime = false;
         }
+    }
+
+    private String getAddressFromLocation(Location markerLoc) {
+        String addressToDisp = "";
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(markerLoc.getLatitude(), markerLoc.getLongitude(), 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+            if (addresses!=null) {
+                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                String city = addresses.get(0).getLocality();
+                String state = addresses.get(0).getAdminArea();
+                String country = addresses.get(0).getCountryName();
+                String postalCode = addresses.get(0).getPostalCode();
+                String knownName = addresses.get(0).getFeatureName();
+
+                addressToDisp = address;
+                String toastAddress = "address: "+address+
+                        "\ncity: "+city+"\nstate: "+state+
+                        "\ncountry :"+country+"\npostalCode: "+postalCode+
+                        "\nknownName: "+knownName;
+                toaster.longToast(toastAddress, pinpointLocMapsActivity.this);
+                return addressToDisp;
+            }
+            else {
+                return null;
+            }
+        }
+        catch (Exception e){e.printStackTrace();}
+        return null;
     }
     //First try end
 
