@@ -78,7 +78,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     private FusedLocationProviderClient mFusedLocationClient;
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
-    Location gpsLoc, markerLoc; Boolean firstTime = true;
+    Location gpsLoc, markerLoc;
+    Boolean firstTime = true, tooZoomedOut = false;
     Geocoder geocoder;
     List<Address> addresses;
 
@@ -91,6 +92,15 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         locationET.setFocusableInTouchMode(false);
         locationET.clearFocus();
         confirmLocationButton = findViewById(R.id.confirmLocButton);
+        confirmLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (tooZoomedOut){
+                    mMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
+                }
+                else { toast("Confirmed location!");}
+            }
+        });
         gpsButton = findViewById(R.id.gpsImgButton);
         gpsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,12 +185,24 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 else {
                     locationET.setText(markerLoc.getLatitude()+", "+markerLoc.getLongitude());
                 }
+
+                //Zoom-in to location if too much zoomed-out
+                float zoom = mMap.getCameraPosition().zoom;
+                toast("zoom : "+zoom+"f");
+                if (zoom<16f){
+                    tooZoomedOut = true;
+                    confirmLocationButton.setText("Pinpoint location");
+                }
+                else {
+                    tooZoomedOut = false;
+                    confirmLocationButton.setText("CONFIRM LOCATION");
+                }
             }
         });
 
     }
 
-    //First try- stackoverflow
+    //get current location - First try- stackoverflow
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
@@ -332,11 +354,11 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 String knownName = addresses.get(0).getFeatureName();
 
                 addressToDisp = address;
-                String toastAddress = "address: "+address+
+                /*String toastAddress = "address: "+address+
                         "\ncity: "+city+"\nstate: "+state+
                         "\ncountry :"+country+"\npostalCode: "+postalCode+
                         "\nknownName: "+knownName;
-                toaster.longToast(toastAddress, pinpointLocMapsActivity.this);
+                toaster.longToast(toastAddress, pinpointLocMapsActivity.this);*/
                 return addressToDisp;
             }
             else {
@@ -357,7 +379,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     }
 
 
-    /*//Check if location permission on
+    //Check if location permission on
+    /*
     int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean checkPermissions(){
         return (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)

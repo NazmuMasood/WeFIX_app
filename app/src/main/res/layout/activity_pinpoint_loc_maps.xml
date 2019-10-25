@@ -46,13 +46,15 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="8dp">
 
                     <ImageButton
                         android:id="@+id/gpsImgButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="#00F0F1F7"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:background="@drawable/gps_image_button_round_shape"
+                        android:backgroundTint="#9FFFFFFF"
                         android:paddingStart="4dp"
                         android:paddingTop="5dp"
                         android:paddingEnd="4dp"
