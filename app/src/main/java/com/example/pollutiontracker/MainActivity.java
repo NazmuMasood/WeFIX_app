@@ -14,7 +14,7 @@ import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
-    Button locationsButton, statsButton, pinpointLocButton;
+    Button locationsButton, statsButton, pinpointLocButton, formButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +55,15 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     toaster.shortToast("No internet connection. Please try again..", MainActivity.this);
                 }
+            }
+        });
+
+        formButton = findViewById(R.id.button4);
+        formButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, formActivity.class);
+                startActivity(intent);
             }
         });
     }

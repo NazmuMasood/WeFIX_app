@@ -3,4 +3,6 @@
     <!--Pollution type indicator legend-->
     <dimen name="marker_legend_width">8dp</dimen>
 
+    <dimen name="form_input_name_textview_width">170dp</dimen>
+    <dimen name="form_input_name_textview_text_size">26sp</dimen>
 </resources>

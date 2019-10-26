@@ -51,15 +51,15 @@
 
                     <ImageButton
                         android:id="@+id/gpsImgButton"
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
                         android:background="@drawable/gps_image_button_round_shape"
                         android:backgroundTint="#9FFFFFFF"
                         android:paddingStart="4dp"
                         android:paddingTop="5dp"
                         android:paddingEnd="4dp"
                         android:paddingBottom="5dp"
-                        android:src="@drawable/ic_gps_indicator"
+                        android:src="@drawable/ic_gps_indicator_20dp"
                         map:layout_constraintBottom_toBottomOf="parent"
                         map:layout_constraintEnd_toEndOf="parent"
                         map:layout_constraintTop_toTopOf="parent" />

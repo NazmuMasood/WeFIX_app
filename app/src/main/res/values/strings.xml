@@ -2,18 +2,27 @@
     <string name="app_name">PollutionTracker</string>
 
     <!--pollutedLocsMapActivity.java-->
-        <!--Pollution types-->
+    <!--Pollution types-->
     <string name="pollution_type_air">Air</string>
     <string name="pollution_type_water">Water</string>
     <string name="pollution_type_noise">Noise</string>
     <string name="pollution_type_land">Land</string>
     <string name="pollution_type_others">Others</string>
-        <!--Report pollution button -->
+    <!--Report pollution button -->
     <string name="report_pollution">Report pollution</string>
 
     <!--pinpointLocMapActivity.java-->
     <string name="confirm_location">Confirm Location</string>
     <string name="change">Change</string>
     <string name="loading_location">Loading location...</string>
+
+    <!--formActivity.java-->
+    <string name="Location">Location:</string>
+    <string name="Category">Category:</string>
+    <string name="Source">Source:</string>
+    <string name="Extent">Extent:</string>
+    <string name="Submit">Submit</string>
+    <string name="Input_Data">Input Data</string>
+
 
 </resources>
