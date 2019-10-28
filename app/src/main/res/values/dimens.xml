@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Pollution type indicator legend-->
+    <!--Pollution type indicator legend [pollutedLocationsActivity.java] -->
     <dimen name="marker_legend_width">8dp</dimen>
 
+    <!--formActivity.java-->
     <dimen name="form_input_name_textview_width">170dp</dimen>
     <dimen name="form_input_name_textview_text_size">26sp</dimen>
 </resources>

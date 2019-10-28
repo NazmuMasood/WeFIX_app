@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="category_array">
+        <item>Air</item>
+        <item>Water</item>
+        <item>Noise</item>
+        <item>Land</item>
+        <item>Others</item>
+    </string-array>
+    
+    <string-array name="source_array">
+        <item>Household</item>
+        <item>Industry</item>
+    </string-array>
+    
+    <string-array name="extent_array">
+        <item>Low</item>
+        <item>Moderate</item>
+        <item>High</item>
+    </string-array>
+</resources>

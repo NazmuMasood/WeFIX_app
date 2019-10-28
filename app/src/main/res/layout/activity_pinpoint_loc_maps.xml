@@ -47,14 +47,13 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="14dp">
 
                     <ImageButton
                         android:id="@+id/gpsImgButton"
-                        android:layout_width="27dp"
-                        android:layout_height="27dp"
+                        android:layout_width="33dp"
+                        android:layout_height="33dp"
                         android:background="@drawable/gps_image_button_round_shape"
-                        android:backgroundTint="#9FFFFFFF"
                         android:paddingStart="4dp"
                         android:paddingTop="5dp"
                         android:paddingEnd="4dp"
@@ -70,7 +69,8 @@
             <EditText
                 android:id="@+id/locationET"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="34dp"
+                android:layout_marginBottom="5dp"
                 android:background="@android:color/white"
                 android:cursorVisible="false"
                 android:ems="10"
@@ -81,6 +81,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
                 android:orientation="horizontal"
                 android:paddingStart="10dp"
                 android:paddingTop="3dp"
