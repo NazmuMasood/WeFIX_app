@@ -1,26 +1,45 @@
 package com.example.pollutiontracker;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
+
+import com.squareup.picasso.Picasso;
 
 public class formActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     EditText locationET;
     Spinner categorySpinner, sourceSpinner, extentSpinner;
-    ImageButton pictureIB; Button submitButton;
+    RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB; ProgressBar imgProgressBar;
+    Button submitButton;
 
     Boolean allFieldsSatisfy = false;
 
     String[] categories, sources, extents;
     String selectedCategory, selectedSource, selectedExtent;
+
+    //Image upload
+    static final int PICK_IMAGE_REQUEST = 1;
+    Uri mImageUri;
+
+    ImageView imgIV; EditText imgFileNameET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +50,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         categorySpinner = findViewById(R.id.categorySpinner);
         sourceSpinner = findViewById(R.id.sourceSpinner);
         extentSpinner = findViewById(R.id.extentSpinner);
-        pictureIB = findViewById(R.id.pictureIB);
+        imgRL = findViewById(R.id.imgRelativeLayout);
+        imgLL = findViewById(R.id.imgLinearLayout);
+        imgIB = findViewById(R.id.imgIB);
+        imgProgressBar = findViewById(R.id.imgProgressBar);
         submitButton = findViewById(R.id.submitButton);
+        //Image upload
+        imgIV = findViewById(R.id.imgIV);
+        imgFileNameET = findViewById(R.id.imgFileNameET);
 
         categories = getResources().getStringArray(R.array.category_array);
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this,
@@ -55,6 +80,12 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         extentSpinner.setAdapter(adapter3);
         extentSpinner.setOnItemSelectedListener(this);
 
+        imgIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFileChooser();
+            }
+        });
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,17 +98,53 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
+    private void openFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null){
+
+            mImageUri = data.getData();
+
+            try {
+                Bitmap bitmapImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mImageUri);
+                int nh = (int) ( bitmapImage.getHeight() * (512.0 / bitmapImage.getWidth()) );
+                Bitmap scaled = Bitmap.createScaledBitmap(bitmapImage, 512, nh, true);
+
+                ImageView tempImg = new ImageView(this);
+                tempImg.setImageBitmap(scaled);
+
+                int mWidth = imgIB.getWidth();
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        mWidth,
+                        LinearLayout.LayoutParams.MATCH_PARENT);
+                lp.setMarginStart(10);
+                tempImg.setLayoutParams(lp);
+                imgLL.addView(tempImg);
+            }
+            catch (Exception e){e.printStackTrace();}
+        }
+    }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         switch (parent.getId()){
             case R.id.categorySpinner:
-                toaster.shortToast("You selected category "+categories[position], formActivity.this);
+                //toaster.shortToast("You selected category "+categories[position], formActivity.this);
                 break;
             case R.id.sourceSpinner:
-                toaster.shortToast("You selected source "+sources[position], formActivity.this);
+                //toaster.shortToast("You selected source "+sources[position], formActivity.this);
                 break;
             case R.id.extentSpinner:
-                toaster.shortToast("You selected extent "+extents[position], formActivity.this);
+                //toaster.shortToast("You selected extent "+extents[position], formActivity.this);
                 break;
         }
     }
