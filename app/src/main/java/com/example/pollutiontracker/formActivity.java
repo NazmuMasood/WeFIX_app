@@ -23,7 +23,12 @@ import android.widget.Spinner;
 
 import com.squareup.picasso.Picasso;
 
-public class formActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
+public class formActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
+        View.OnLongClickListener {
 
     EditText locationET;
     Spinner categorySpinner, sourceSpinner, extentSpinner;
@@ -38,6 +43,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     //Image upload
     static final int PICK_IMAGE_REQUEST = 1;
     Uri mImageUri;
+    HashMap<String, Uri> images = new HashMap<>();
 
     ImageView imgIV; EditText imgFileNameET;
 
@@ -121,6 +127,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
                 ImageView tempImg = new ImageView(this);
                 tempImg.setImageBitmap(scaled);
+                long time = new Date().getTime();
 
                 int mWidth = imgIB.getWidth();
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -128,12 +135,34 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                         LinearLayout.LayoutParams.MATCH_PARENT);
                 lp.setMarginStart(10);
                 tempImg.setLayoutParams(lp);
+                tempImg.setTag("IMG_"+time);
                 imgLL.addView(tempImg);
+
+                images.put("IMG_"+time, mImageUri);
+                tempImg.setOnLongClickListener(this);
             }
             catch (Exception e){e.printStackTrace();}
         }
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+        //return false;
+        ImageView imageView = imgLL.findViewWithTag(v.getTag());
+        toaster.shortToast("You clicked image : "+imageView.getTag(), formActivity.this);
+
+        String key = (String) imageView.getTag();
+        Uri thisImageUri = images.get(key);
+        //imgIV.setImageURI(thisImageUri);
+
+        Intent intent = new Intent(this, imgActivity.class);
+        intent.putExtra("ImageUri", thisImageUri);
+        startActivity(intent);
+
+        return true;
+    }
+
+    //Spinner item selection
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         switch (parent.getId()){
