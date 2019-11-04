@@ -3,9 +3,12 @@ package com.example.pollutiontracker;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -49,6 +52,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
     ImageView imgIV; EditText imgFileNameET;
 
+    //Image intent dialog
+    ImageButton cameraIB, galleryIB; Dialog imgIntentDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +72,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         //Image upload
         imgIV = findViewById(R.id.imgIV);
         imgFileNameET = findViewById(R.id.imgFileNameET);
+        //Image intent dialog
+        imgIntentDialog = new Dialog(this);
 
         categories = getResources().getStringArray(R.array.category_array);
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this,
@@ -91,7 +99,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         imgIB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openFileChooser();
+                //openFileChooser();
+                showImgIntentPopup();
             }
         });
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -106,12 +115,41 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    private void openFileChooser() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    private void openFileChooser(String intentType) {
+        if (intentType.equals("camera")){
+            toaster.shortToast("You chose camera", formActivity.this);
+        }
+        if (intentType.equals("gallery")) {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        }
+    }
+
+    private void showImgIntentPopup(){
+        imgIntentDialog.setContentView(R.layout.activity_image_intent_dialog);
+        cameraIB = imgIntentDialog.findViewById(R.id.cameraIB);
+        cameraIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFileChooser("camera");
+                imgIntentDialog.dismiss();
+            }
+        });
+        galleryIB = imgIntentDialog.findViewById(R.id.galleryIB);
+        galleryIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFileChooser("gallery");
+                imgIntentDialog.dismiss();
+            }
+        });
+
+        imgIntentDialog.setCanceledOnTouchOutside(true);
+        imgIntentDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        imgIntentDialog.show();
     }
 
     @Override
@@ -214,7 +252,6 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         String key = (String) imageView.getTag();
         images.remove(key);
         imgLL.removeView(v);
-
         return true;
     }
 

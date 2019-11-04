@@ -155,8 +155,8 @@
                     android:id="@+id/imgIB"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
-                    android:src="@drawable/ic_insert_picture_icon_60dp"
-                    tools:srcCompat="@drawable/ic_insert_picture_icon_60dp" />
+                    android:src="@drawable/ic_insert_picture_60dp"
+                    tools:srcCompat="@drawable/ic_insert_picture_60dp" />
 
             </LinearLayout>
         </HorizontalScrollView>
