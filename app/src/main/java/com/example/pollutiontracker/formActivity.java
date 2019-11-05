@@ -46,7 +46,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     String selectedCategory, selectedSource, selectedExtent;
 
     //Image upload
-    static final int PICK_IMAGE_REQUEST = 1;
+    static final int PICK_IMAGE_REQUEST = 2, TAKE_PICTURE_REQUEST = 1;
     Uri mImageUri;
     HashMap<String, Uri> images = new HashMap<>();
 
@@ -99,7 +99,6 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         imgIB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //openFileChooser();
                 showImgIntentPopup();
             }
         });
