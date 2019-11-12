@@ -52,28 +52,24 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         View.OnLongClickListener,
         View.OnClickListener
 {
+    Boolean allFieldsSatisfy = false;
 
     EditText locationET;
     Spinner categorySpinner, sourceSpinner, extentSpinner;
-    RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB; ProgressBar imgProgressBar;
+    String[] categories, sources, extents;
     Button submitButton;
 
-    Boolean allFieldsSatisfy = false;
-
-    String[] categories, sources, extents;
-
-    //Image upload
+    //Image related
     static final int REQUEST_IMAGE_CHOOSE = 2, REQUEST_IMAGE_CAPTURE = 1;
     Uri mImageUri;
     HashMap<String, Uri> images = new HashMap<>();
-
-    //Image capture
+    RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB; ProgressBar imgProgressBar;
+        //explicitly camera related
     String currentPhotoPath; //Absolute path where captured images would be stored
     Uri photoURI;//save this uri in onSaveInstance state else it might become null when..
                  //..user rotates device while using camera
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
-
-    //Image intent dialog
+        //Image intent dialog
     ImageButton cameraIB, galleryIB; Dialog imgIntentDialog;
 
     @Override
@@ -151,6 +147,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
             }
             else {toaster.longToast("Cannot find the photo uri", formActivity.this);}
+        }
+        else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_CANCELED){
+            this.getContentResolver().delete(photoURI, null, null);
         }
 
         //If image is selected from gallery
@@ -323,7 +322,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    //setPicToImageView()
+    //setPic() to ImageView
     /*private void setPic() {
         // Get the dimensions of the View
         int targetW = imageView.getWidth();
@@ -474,6 +473,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         // }
     }
 
+    // getRealPathFromURI(Uri contentURI)
     /*public String getRealPathFromURI(Uri contentURI) {
         String result;
         Cursor cursor = this.getContentResolver().query(contentURI, null,
