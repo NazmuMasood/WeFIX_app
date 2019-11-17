@@ -5,5 +5,5 @@
 
     <!--formActivity.java-->
     <dimen name="form_input_name_textview_width">170dp</dimen>
-    <dimen name="form_input_name_textview_text_size">26sp</dimen>
+    <dimen name="form_input_name_textview_text_size">23sp</dimen>
 </resources>

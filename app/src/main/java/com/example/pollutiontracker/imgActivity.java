@@ -39,7 +39,7 @@ public class imgActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_img);
 
-        imgFrameIV = findViewById(R.id.imgFrameIV);
+        //imgFrameIV = findViewById(R.id.imgFrameIV);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null){
@@ -54,6 +54,78 @@ public class imgActivity extends AppCompatActivity {
                     .into(imgFrameIV);
             //imgFrameIV.setImageURI(mImageUri);
             */
+
+        /*
+        if (imgFrameIV.getWidth()<=0 || imgFrameIV.getHeight()<=0){
+           imgFrameIV.setImageURI(mImageUri);
+           return;
+        }
+
+        //--------GAP---------//
+        Transformation transformation = new Transformation() {
+
+            @Override
+            public Bitmap transform(Bitmap source) {
+                int targetWidth = imgFrameIV.getWidth();
+
+                double aspectRatio = (double) source.getHeight() / (double) source.getWidth();
+                int targetHeight = (int) (targetWidth * aspectRatio);
+                Bitmap result = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false);
+                if (result != source) {
+                    // Same bitmap is returned if sizes are the same
+                    source.recycle();
+                }
+                return result;
+            }
+
+            @Override
+            public String key() {
+                return "transformation" + " desiredWidth";
+            }
+        };
+
+        //mMessage_pic_url = message_pic_url;
+
+        Picasso.get()
+                .load(mImageUri)
+                .error(android.R.drawable.stat_notify_error)
+                .transform(transformation)
+                .into(imgFrameIV, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        //holder.progressBar_picture.setVisibility(View.GONE);
+                        toaster.shortToast("Image successfully loaded", imgActivity.this);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e("imgActivity", "error");
+                        //holder.progressBar_picture.setVisibility(View.GONE);
+                        toaster.shortToast("Image couldn't be loaded", imgActivity.this);
+                    }
+                });
+*/
+            //--------GAP---------//
+            /*
+            if (isStoragePermissionGranted()) {
+                Uri newImgUri = Uri.parse(compressImage(mImageUri.toString()));
+                imgFrameIV.setImageURI(newImgUri);
+            }
+            else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            }
+            */
+
+        }
+    }
+
+    public void onWindowFocusChanged(boolean hasFocus) {
+        // TODO Auto-generated method stub
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            //ImageView img = (ImageView) findViewById(R.id.img);
+            //Log.d(TAG, "width : " + img.getWidth());
+            imgFrameIV = findViewById(R.id.imgFrameIV);
 
             //--------GAP---------//
             Transformation transformation = new Transformation() {
@@ -98,17 +170,6 @@ public class imgActivity extends AppCompatActivity {
                             toaster.shortToast("Image couldn't be loaded", imgActivity.this);
                         }
                     });
-
-            //--------GAP---------//
-            /*
-            if (isStoragePermissionGranted()) {
-                Uri newImgUri = Uri.parse(compressImage(mImageUri.toString()));
-                imgFrameIV.setImageURI(newImgUri);
-            }
-            else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            }
-            */
 
         }
     }

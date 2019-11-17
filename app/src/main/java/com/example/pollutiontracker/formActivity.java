@@ -17,12 +17,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,6 +39,11 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -43,6 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -52,7 +62,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         View.OnLongClickListener,
         View.OnClickListener
 {
-    Boolean allFieldsSatisfy = false;
+    Boolean allFieldsSatisfy = true;
 
     EditText locationET;
     Spinner categorySpinner, sourceSpinner, extentSpinner;
@@ -63,7 +73,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     static final int REQUEST_IMAGE_CHOOSE = 2, REQUEST_IMAGE_CAPTURE = 1;
     Uri mImageUri;
     HashMap<String, Uri> images = new HashMap<>();
-    RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB; ProgressBar imgProgressBar;
+    RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB; ProgressBar mProgressBar;
         //explicitly camera related
     String currentPhotoPath; //Absolute path where captured images would be stored
     Uri photoURI;//save this uri in onSaveInstance state else it might become null when..
@@ -85,7 +95,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         imgRL = findViewById(R.id.imgRelativeLayout);
         imgLL = findViewById(R.id.imgLinearLayout);
         imgIB = findViewById(R.id.imgIB);
-        imgProgressBar = findViewById(R.id.imgProgressBar);
+        mProgressBar = findViewById(R.id.mProgressBar);
         submitButton = findViewById(R.id.submitButton);
         //Image intent dialog
         imgIntentDialog = new Dialog(this);
@@ -120,13 +130,71 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (allFieldsSatisfy)
+                if (allFieldsSatisfy) {
                     toaster.longToast("Your report is being uploaded", formActivity.this);
-                else
-                    toaster.shortToast("Please fill all input fields", formActivity.this);
+                    handleUpload();
+                }
+                else { toaster.shortToast("Please fill all input fields", formActivity.this); }
             }
         });
+    }
 
+    /*
+    *
+    * Dealing with report upload/post
+    * */
+    private void handleUpload() {
+        //@SuppressWarnings("VisibleForTests")
+        if (!activeNetwork()){
+            toaster.shortToast("No internet connection. Please try again...", formActivity.this);
+            return;
+        }
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference reportsRef = database.getReference("pollution-tracker/reports");
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        //if no image has been selected
+        if (images.isEmpty()){
+            mProgressBar.setVisibility(View.VISIBLE);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            //Map<String, Report> reports = new HashMap<>();
+            //ArrayList<Report> reports = new ArrayList<>();
+            LatLng rajshahi = new LatLng(24.367350, 88.636055);
+
+            Report report = new Report(
+                    rajshahi.latitude, rajshahi.longitude,
+                    categorySpinner.getSelectedItem().toString(),
+                    sourceSpinner.getSelectedItem().toString(),
+                    extentSpinner.getSelectedItem().toString()
+            );
+            //reports.put(timeStamp, report);
+            //reports.add(report);
+
+            reportsRef.child(timeStamp).setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+                        toaster.longToast("Report has been posted successfully", formActivity.this);
+                        mProgressBar.setVisibility(View.GONE);
+                    }
+                    else {toaster.longToast("Report post error. Please try again...", formActivity.this);}
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                }
+            });
+        }
+        //if image(s) has been selected
+        else {
+
+        }
+    }
+
+    public boolean activeNetwork () {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnected();
+        return isConnected;
     }
 
 
