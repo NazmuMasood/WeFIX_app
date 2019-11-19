@@ -149,7 +149,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(View v) {
                 if (allFieldsSatisfy) {
-                    toaster.longToast("Your report is being uploaded", formActivity.this);
+                    toaster.shortToast("Your report is being uploaded", formActivity.this);
                     handleUpload();
                 }
                 else { toaster.shortToast("Please fill all input fields", formActivity.this); }
@@ -198,7 +198,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
-                        toaster.longToast("Report has been posted successfully", formActivity.this);
+                        toaster.shortToast("Report has been posted successfully", formActivity.this);
                         mProgressBar.setVisibility(View.GONE);
 
                         Intent intent = new Intent(formActivity.this, pollutedLocsMapsActivity.class);

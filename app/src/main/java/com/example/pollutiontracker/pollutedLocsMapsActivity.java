@@ -81,8 +81,6 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                             .title(report.address)
                             .icon(getMarkerIcon(report.category))
                             .flat(true));
-                    //System.out.println(report.toString());
-                    //Log.d("onDataChange", "report: key ="+snapshot.getKey());
                 }
                 toaster.shortToast( "Found "+dataSnapshot.getChildrenCount()+" different polluted locations",
                         pollutedLocsMapsActivity.this);
