@@ -17,6 +17,59 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ImageView
+            android:id="@+id/pollutedLocMarkerIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:src="@drawable/ic_location_pin_32dp"
+            map:layout_constraintBottom_toBottomOf="parent"
+            map:layout_constraintEnd_toEndOf="parent"
+            map:layout_constraintStart_toStartOf="parent"
+            map:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/pollutedLocCustomSearchET"
+            android:layout_width="175dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="6dp"
+            android:background="@android:color/white"
+            android:cursorVisible="false"
+            android:ems="10"
+            android:hint="@string/loading_location"
+            android:inputType="textPersonName"
+            android:paddingStart="5dp"
+            map:layout_constraintBottom_toBottomOf="parent"
+            map:layout_constraintEnd_toStartOf="@+id/pollutedLocCustomConfirmButton"
+            map:layout_constraintTop_toTopOf="parent"
+            map:layout_constraintVertical_bias="0.0" />
+
+        <Button
+            android:id="@+id/pollutedLocCustomConfirmButton"
+            android:layout_width="89dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:text="CONFIRM"
+            map:layout_constraintBottom_toBottomOf="parent"
+            map:layout_constraintEnd_toStartOf="@+id/pollutedLocSearchTypeButton"
+            map:layout_constraintTop_toTopOf="parent"
+            map:layout_constraintVertical_bias="0.0" />
+
+        <Button
+            android:id="@+id/pollutedLocSearchTypeButton"
+            android:layout_width="83dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="6dp"
+            android:gravity="center|center_horizontal|center_vertical"
+            android:text="CUSTOM"
+            map:layout_constraintBottom_toBottomOf="parent"
+            map:layout_constraintEnd_toEndOf="parent"
+            map:layout_constraintTop_toTopOf="parent"
+            map:layout_constraintVertical_bias="0.0" />
+
         <Button
             android:id="@+id/reportButton"
             android:layout_width="222dp"
@@ -123,6 +176,7 @@
                 android:text="@string/pollution_type_others" />
 
         </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
