@@ -5,13 +5,17 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -24,6 +28,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +42,8 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 {
 
     private GoogleMap mMap;
+    DatabaseReference ref; Button reportButton;
+    ArrayList<Double> lat, lng; ArrayList<String> addresses; ArrayList<LatLng> latLngs;
     LinearLayout list;
 
     @Override
@@ -48,38 +59,73 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        reportButton = findViewById(R.id.reportButton);
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(pollutedLocsMapsActivity.this, pinpointLocMapsActivity.class);
+                startActivity(intent);
+            }
+        });
 
-        // Add a marker in Sydney and move the camera
-        //marker's url: https://www.flaticon.com/free-icon/placeholder_149060
-        ArrayList<Double> lat = new ArrayList<>(Arrays.asList( 24.367350, 24.368346, 24.366773));
-        ArrayList<Double> lng = new ArrayList<>(Arrays.asList( 88.636055, 88.638465, 88.639275));
+        ref = FirebaseDatabase.getInstance().getReference("pollution-tracker/reports");
+        // Attach a listener to read the data at our 'reports' reference
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Report report = snapshot.getValue(Report.class);
+                    Log.d("onDataChange", "report: location="+report.location.latitude+", "+report.location.longitude);
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(report.location.latitude, report.location.longitude))
+                            .title(report.address)
+                            .icon(getMarkerIcon(report.category))
+                            .flat(true));
+                    //System.out.println(report.toString());
+                    //Log.d("onDataChange", "report: key ="+snapshot.getKey());
+                }
+                toaster.shortToast( "Found "+dataSnapshot.getChildrenCount()+" different polluted locations",
+                        pollutedLocsMapsActivity.this);
+            }
 
-        ArrayList<LatLng> latLngs = new ArrayList<>();
-        for (int i=0; i<lat.size(); i++) {
-            latLngs.add(new LatLng( lat.get(i), lng.get(i) ));
-            Log.i("LatLngs","New location: "+latLngs.get(i).latitude+", "+latLngs.get(i).longitude);
-        }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+            }
+        });
 
-        for (LatLng point : latLngs) {
-            mMap.addMarker(new MarkerOptions()
-                    .position(point)
-                    .title("A Marker in Rajshahi")
-                    .icon(bitmapDescriptorFromVector(this, R.drawable.ic_blue_marker_32dp))
-                    .flat(true));
-        }
-
-        LatLng rajshahi = new LatLng(24.367350, 88.636055);
+        //LatLng rajshahi = new LatLng(24.367350, 88.636055);
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(rajshahi));
-        moveToCurrentLocation(rajshahi);
+        LatLng shaplaChottor = new LatLng(23.726623, 90.421576);
+        moveToLocation(shaplaChottor);
     }
 
-    private void moveToCurrentLocation(LatLng currentLocation)
+    private BitmapDescriptor getMarkerIcon(String category){
+        if (category.equals("Air")) {
+           return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_air_32dp);
+        }
+        else if (category.equals("Water")) {
+            return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_water_32dp);
+        }
+        else if (category.equals("Noise")) {
+            return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_noise_32dp);
+        }
+        else if (category.equals("Land")) {
+            return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_land_32dp);
+        }
+        else if (category.equals("Others")) {
+            return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_others_32dp);
+        }
+        return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_others_32dp);
+    }
+
+    private void moveToLocation(LatLng currentLocation)
     {
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,10f));
         // Zoom in, animating the camera.
         mMap.animateCamera(CameraUpdateFactory.zoomIn());
         // Zoom out to zoom level 10, animating with a duration of 2 seconds.
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(6.5f), 2000, null);
     }
 
     //bitmapDescriptor method to convert vectorAsset to bitmap
@@ -91,5 +137,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
+
+
 
 }

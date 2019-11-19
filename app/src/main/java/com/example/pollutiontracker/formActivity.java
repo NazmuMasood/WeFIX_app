@@ -7,14 +7,11 @@ import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
@@ -22,7 +19,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -44,19 +40,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-import static java.security.AccessController.getContext;
 
 public class formActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
         View.OnLongClickListener,
@@ -82,12 +74,38 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         //Image intent dialog
     ImageButton cameraIB, galleryIB; Dialog imgIntentDialog;
 
+    //Location data which we got from pinpointLocMapsActivity
+    com.example.pollutiontracker.mLatLng mLatLng; String mAddress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form);
 
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            mAddress = bundle.getString("address");
+            LatLng tmpLatLng = bundle.getParcelable("LatLng");
+            mLatLng = new mLatLng(tmpLatLng.latitude, tmpLatLng.longitude);
+            toaster.shortToast("address "+mAddress, formActivity.this);
+        }
+        else{
+            toaster.shortToast("Sorry couldn't find location data. Please set location again..", formActivity.this);
+            Intent intent = new Intent(formActivity.this, pinpointLocMapsActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+
         locationET = findViewById(R.id.locationET);
+        locationET.setText(mAddress);
+        locationET.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(formActivity.this, pinpointLocMapsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
         categorySpinner = findViewById(R.id.categorySpinner);
         sourceSpinner = findViewById(R.id.sourceSpinner);
         extentSpinner = findViewById(R.id.extentSpinner);
@@ -152,7 +170,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference reportsRef = database.getReference("pollution-tracker/reports");
 
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
         //if no image has been selected
         if (images.isEmpty()){
             mProgressBar.setVisibility(View.VISIBLE);
@@ -160,10 +178,15 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             //Map<String, Report> reports = new HashMap<>();
             //ArrayList<Report> reports = new ArrayList<>();
-            LatLng rajshahi = new LatLng(24.367350, 88.636055);
+
+            //LatLng rajshahi = new LatLng(24.367350, 88.636055);
+            //Map<String, LatLng> atLoc = new HashMap<>();
+            //atLoc.put("location", rajshahi);
 
             Report report = new Report(
-                    rajshahi.latitude, rajshahi.longitude,
+                    mLatLng,
+                    timeStamp,
+                    mAddress,
                     categorySpinner.getSelectedItem().toString(),
                     sourceSpinner.getSelectedItem().toString(),
                     extentSpinner.getSelectedItem().toString()
@@ -171,12 +194,16 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             //reports.put(timeStamp, report);
             //reports.add(report);
 
-            reportsRef.child(timeStamp).setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
+            reportsRef.push().setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
                         toaster.longToast("Report has been posted successfully", formActivity.this);
                         mProgressBar.setVisibility(View.GONE);
+
+                        Intent intent = new Intent(formActivity.this, pollutedLocsMapsActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
                     }
                     else {toaster.longToast("Report post error. Please try again...", formActivity.this);}
                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -185,7 +212,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         //if image(s) has been selected
         else {
-
+            toaster.longToast("Sorry image upload isn't configured yet", formActivity.this);
         }
     }
 
@@ -464,6 +491,13 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onNothingSelected(AdapterView<?> parent) { }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(formActivity.this, pollutedLocsMapsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
 
     /*
     *

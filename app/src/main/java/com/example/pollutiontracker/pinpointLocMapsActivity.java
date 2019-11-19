@@ -100,7 +100,17 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 if (tooZoomedOut){
                     mMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
                 }
-                else { toast("Confirmed location!");}
+                else {
+                    toaster.shortToast("Confirmed location!\n"
+                            +markerLoc.getLatitude()+", "+markerLoc.getLongitude()
+                            +"\n"+locationET.getText(), pinpointLocMapsActivity.this);
+
+                    Intent intent = new Intent(pinpointLocMapsActivity.this, formActivity.class);
+                    intent.putExtra("LatLng", new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()) );
+                    intent.putExtra("address", locationET.getText().toString());
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                }
             }
         });
         gpsButton = findViewById(R.id.gpsImgButton);
