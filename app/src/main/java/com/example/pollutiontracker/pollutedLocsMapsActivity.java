@@ -43,8 +43,6 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 
     private GoogleMap mMap;
     DatabaseReference ref; Button reportButton;
-    ArrayList<Double> lat, lng; ArrayList<String> addresses; ArrayList<LatLng> latLngs;
-    LinearLayout list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
