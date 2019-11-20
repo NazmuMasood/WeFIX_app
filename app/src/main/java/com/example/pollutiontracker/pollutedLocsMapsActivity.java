@@ -1,5 +1,6 @@
 package com.example.pollutiontracker;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -14,6 +15,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +27,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryDataEventListener;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,7 +57,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 {
 
     private GoogleMap mMap;
-    DatabaseReference ref;
+    DatabaseReference ref; GeoFire geoFire;
     Button reportButton, pollutedLocSearchTypeButton, pollutedLocCustomConfirmButton;
     EditText pollutedLocCustomSearchET; ImageView pollutedLocMarkerIV;
     int pollutedLocSearchType = 0;
@@ -85,17 +93,25 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        ref = FirebaseDatabase.getInstance().getReference("pollution-tracker/reports");
+        final DatabaseReference geoFireRef = FirebaseDatabase.getInstance().getReference("pollution-tracker/geofire");
+        geoFire = new GeoFire(geoFireRef);
+
         pollutedLocCustomConfirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (tooZoomedOut){
-                    mMap.animateCamera( CameraUpdateFactory.zoomTo( 14.0f ) );
+                    mMap.animateCamera( CameraUpdateFactory.zoomTo( 15.0f ) );
                 }
                 else {
                     toaster.shortToast("Confirmed location!\n"
                             +markerLoc.getLatitude()+", "+markerLoc.getLongitude()
                             +"\n"+pollutedLocCustomSearchET.getText(), pollutedLocsMapsActivity.this);
 
+                    mMap.clear();
+                    GeoQuery geoQuery = geoFire.queryAtLocation(
+                            new GeoLocation(markerLoc.getLatitude(), markerLoc.getLongitude()), 1.0);
+                    addEventListenerToGeoQuery(geoQuery);
                 }
             }
         });
@@ -144,7 +160,6 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         //getting reported locations from firebase and populating map
         getPollutedLocations();
 
-        //LatLng rajshahi = new LatLng(24.367350, 88.636055);
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(rajshahi));
         LatLng shaplaChottor = new LatLng(23.726623, 90.421576);
         moveToLocation(shaplaChottor);
@@ -173,7 +188,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 
                 //Zoom-in to location if too much zoomed-out
                 float zoom = mMap.getCameraPosition().zoom;
-                if (zoom<14f){
+                if (zoom<15.0f){
                     tooZoomedOut = true;
                     pollutedLocCustomConfirmButton.setText("PINPOINT");
                 }
@@ -185,20 +200,73 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         });
     }
 
+    private void addEventListenerToGeoQuery(GeoQuery geoQuery) {
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                Log.d("onKeyEnterGeoFire", String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+                //String loc = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
+                //Log.d("geoQueryEventListener", "onKeyEntered: " + key + " @ " + loc);
+                FirebaseDatabase.getInstance()
+                        .getReference("pollution-tracker/reports/"+key)
+                        .getRef().addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Report report = dataSnapshot.getValue(Report.class);
+                        Log.d("onDataChangeGeoFire", "report: location ="+report.location.latitude+", "+report.location.longitude);
+                        mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(report.location.latitude, report.location.longitude))
+                                .title(report.address)
+                                .icon(getMarkerIcon(report.category))
+                        );
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                Log.d("onKeyExitGeoFire", String.format("Key %s is no longer in the search area", key));
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                Log.d("onKeyMoveGeoFire", String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                Log.d("onGeoQuery", "All initial data has been loaded and events have been fired!");
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.d("onGeoQueryError", "There was an error with this query: " + error);
+            }
+        });
+    }
+
     private void getPollutedLocations(){
-        ref = FirebaseDatabase.getInstance().getReference("pollution-tracker/reports");
+        if(!activeNetwork()){
+            toaster.shortToast("No internet connection. Please try again...", pollutedLocsMapsActivity.this);
+            return;
+        }
         // Attach a listener to read the data at our 'reports' reference
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Report report = snapshot.getValue(Report.class);
-                    Log.d("onDataChange", "report: location="+report.location.latitude+", "+report.location.longitude);
+                    Log.d("onDataChangeFireB", "report: location= "+report.location.latitude+", "+report.location.longitude);
                     mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(report.location.latitude, report.location.longitude))
                             .title(report.address)
                             .icon(getMarkerIcon(report.category))
-                            .flat(true));
+                    );
                 }
                 toaster.shortToast( "Found "+dataSnapshot.getChildrenCount()+" different polluted locations",
                         pollutedLocsMapsActivity.this);
@@ -247,6 +315,16 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    public boolean activeNetwork () {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnected();
+
+        return isConnected;
     }
 
     private String getAddressFromLocation(Location markerLoc) {

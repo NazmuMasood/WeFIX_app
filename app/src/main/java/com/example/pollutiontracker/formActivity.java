@@ -35,9 +35,12 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -169,6 +172,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference reportsRef = database.getReference("pollution-tracker/reports");
+        final DatabaseReference geoFireRef = FirebaseDatabase.getInstance().getReference("pollution-tracker/geofire");
 
         String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
         //if no image has been selected
@@ -194,10 +198,24 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             //reports.put(timeStamp, report);
             //reports.add(report);
 
-            reportsRef.push().setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
+            final String reportId = reportsRef.push().getKey();
+            reportsRef.child(reportId).setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
+                        GeoFire geoFire = new GeoFire(geoFireRef);
+                        geoFire.setLocation(reportId, new GeoLocation(mLatLng.latitude, mLatLng.longitude),
+                                new GeoFire.CompletionListener() {
+                                    @Override
+                                    public void onComplete(String key, DatabaseError error) {
+                                        if (error != null) {
+                                            System.err.println("There was an error saving the location to GeoFire: " + error);
+                                        } else {
+                                            System.out.println("Location saved on server successfully!");
+                                        }
+                                    }
+                                });
+
                         toaster.shortToast("Report has been posted successfully", formActivity.this);
                         mProgressBar.setVisibility(View.GONE);
 

@@ -5,7 +5,7 @@
     <color name="colorAccent">#D81B60</color>
 
     <!--Pollution type indicator legend-->
-    <color name="colorAir">#469990</color>
+    <color name="colorAir">#89bcd0</color>
     <color name="colorWater">#2196F3</color>
     <color name="colorNoise">#f032e6</color>
     <color name="colorLand">#9A6324</color>
