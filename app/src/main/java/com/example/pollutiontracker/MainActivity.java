@@ -38,6 +38,13 @@ public class MainActivity extends AppCompatActivity {
 
         //Button to graphs-charts-activity
         statsButton = findViewById(R.id.button2);
+        statsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, reportActivity.class);
+                startActivity(intent);
+            }
+        });
 
         pinpointLocButton = findViewById(R.id.button3);
         pinpointLocButton.setOnClickListener(new View.OnClickListener() {

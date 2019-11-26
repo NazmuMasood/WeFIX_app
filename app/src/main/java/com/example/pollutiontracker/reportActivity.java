@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.smarteist.autoimageslider.SliderView;
 
 public class reportActivity extends AppCompatActivity {
     GeoFire geoFire; DatabaseReference ref; Location markerLoc;
@@ -27,18 +28,23 @@ public class reportActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
 
-        Bundle extras = getIntent().getExtras();
+        /*Bundle extras = getIntent().getExtras();
         if (extras != null) {
             markerLoc = getIntent().getParcelableExtra("MarkerLoc");
         }
-        else {return;}
+        else {return;}*/
 
-        ref = FirebaseDatabase.getInstance().getReference("pollution-tracker/reports");
+        SliderView sliderView = findViewById(R.id.imageSlider);
+        SliderAdapterExample adapter = new SliderAdapterExample(this);
+        sliderView.setSliderAdapter(adapter);
+
+
+        /*ref = FirebaseDatabase.getInstance().getReference("pollution-tracker/reports");
         final DatabaseReference geoFireRef = FirebaseDatabase.getInstance().getReference("pollution-tracker/geofire");
         geoFire = new GeoFire(geoFireRef);
         GeoQuery geoQuery = geoFire.queryAtLocation(
                 new GeoLocation(markerLoc.getLatitude(), markerLoc.getLongitude()), 1.0);
-        addEventListenerToGeoQuery(geoQuery);
+        addEventListenerToGeoQuery(geoQuery);*/
     }
 
     private void addEventListenerToGeoQuery(GeoQuery geoQuery) {
