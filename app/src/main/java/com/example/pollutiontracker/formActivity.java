@@ -19,6 +19,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -33,22 +34,36 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -67,8 +82,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     //Image related
     static final int REQUEST_IMAGE_CHOOSE = 2, REQUEST_IMAGE_CAPTURE = 1;
     Uri mImageUri;
-    HashMap<String, Uri> images = new HashMap<>();
-    RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB; ProgressBar mProgressBar;
+    HashMap<String, Uri> images = new HashMap<>(); ArrayList<String> imagesUrl = new ArrayList<>();
+    RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB;
+    ProgressBar mProgressBar; TextView mProgressTV;
         //explicitly camera related
     String currentPhotoPath; //Absolute path where captured images would be stored
     Uri photoURI;//save this uri in onSaveInstance state else it might become null when..
@@ -117,6 +133,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         imgLL = findViewById(R.id.imgLinearLayout);
         imgIB = findViewById(R.id.imgIB);
         mProgressBar = findViewById(R.id.mProgressBar);
+        mProgressTV = findViewById(R.id.mProgressTV);
         submitButton = findViewById(R.id.submitButton);
         //Image intent dialog
         imgIntentDialog = new Dialog(this);
@@ -152,7 +169,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(View v) {
                 if (allFieldsSatisfy) {
-                    toaster.shortToast("Your report is being uploaded", formActivity.this);
+                    //toaster.shortToast("Your report is being uploaded", formActivity.this);
                     handleUpload();
                 }
                 else { toaster.shortToast("Please fill all input fields", formActivity.this); }
@@ -170,24 +187,38 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             toaster.shortToast("No internet connection. Please try again...", formActivity.this);
             return;
         }
+        //if no image has been selected
+        if (images.isEmpty()){
+            handleReportUpload(null);
+        }
+        //if image(s) has been selected
+        else {
+            handleImgUpload();
+        }
+    }
+
+    private void handleReportUpload(ArrayList<String> imagesUrl){
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference reportsRef = database.getReference("pollution-tracker/reports");
         final DatabaseReference geoFireRef = FirebaseDatabase.getInstance().getReference("pollution-tracker/geofire");
 
         String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
-        //if no image has been selected
-        if (images.isEmpty()){
-            mProgressBar.setVisibility(View.VISIBLE);
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            //Map<String, Report> reports = new HashMap<>();
-            //ArrayList<Report> reports = new ArrayList<>();
 
-            //LatLng rajshahi = new LatLng(24.367350, 88.636055);
-            //Map<String, LatLng> atLoc = new HashMap<>();
-            //atLoc.put("location", rajshahi);
+        mProgressBar.setVisibility(View.VISIBLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        /*
+         *Uploading the report to firebase database after all images uploaded
+         */
+        //Map<String, Report> reports = new HashMap<>();
+        //ArrayList<Report> reports = new ArrayList<>();
 
-            Report report = new Report(
+        //LatLng rajshahi = new LatLng(24.367350, 88.636055);
+        //Map<String, LatLng> atLoc = new HashMap<>();
+        //atLoc.put("location", rajshahi);
+        Report report;
+        if (imagesUrl==null) {
+            report = new Report(
                     mLatLng,
                     timeStamp,
                     mAddress,
@@ -195,43 +226,114 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     sourceSpinner.getSelectedItem().toString(),
                     extentSpinner.getSelectedItem().toString()
             );
-            //reports.put(timeStamp, report);
-            //reports.add(report);
+        }
+        else {
+            report = new Report(
+                    mLatLng,
+                    timeStamp,
+                    mAddress,
+                    categorySpinner.getSelectedItem().toString(),
+                    sourceSpinner.getSelectedItem().toString(),
+                    extentSpinner.getSelectedItem().toString(),
+                    imagesUrl
+            );
+        }
+        //reports.put(timeStamp, report);
+        //reports.add(report);
 
-            final String reportId = reportsRef.push().getKey();
-            reportsRef.child(reportId).setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()){
-                        GeoFire geoFire = new GeoFire(geoFireRef);
-                        geoFire.setLocation(reportId, new GeoLocation(mLatLng.latitude, mLatLng.longitude),
-                                new GeoFire.CompletionListener() {
-                                    @Override
-                                    public void onComplete(String key, DatabaseError error) {
-                                        if (error != null) {
-                                            System.err.println("There was an error saving the location to GeoFire: " + error);
-                                        } else {
-                                            System.out.println("Location saved on server successfully!");
-                                        }
+        final String reportId = reportsRef.push().getKey();
+        reportsRef.child(reportId).setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()){
+                    GeoFire geoFire = new GeoFire(geoFireRef);
+                    geoFire.setLocation(reportId, new GeoLocation(mLatLng.latitude, mLatLng.longitude),
+                            new GeoFire.CompletionListener() {
+                                @Override
+                                public void onComplete(String key, DatabaseError error) {
+                                    if (error != null) {
+                                        System.err.println("There was an error saving the location to GeoFire: " + error);
+                                    } else {
+                                        System.out.println("Location saved on server successfully!");
                                     }
-                                });
+                                }
+                            });
 
-                        toaster.shortToast("Report has been posted successfully", formActivity.this);
-                        mProgressBar.setVisibility(View.GONE);
+                    toaster.shortToast("Report was posted successfully", formActivity.this);
+                    mProgressBar.setVisibility(View.GONE);
 
-                        Intent intent = new Intent(formActivity.this, pollutedLocsMapsActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                    }
-                    else {toaster.longToast("Report post error. Please try again...", formActivity.this);}
-                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    Intent intent = new Intent(formActivity.this, pollutedLocsMapsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                }
+                else {toaster.longToast("Report post error. Please try again...", formActivity.this);}
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            }
+        });
+    }
+
+    private void handleImgUpload() {
+        /*
+         *Uploading the images first to firebase storage, one-by-one
+         */
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("pollution-tracker");
+
+        final ArrayList<UploadTask> uploadTasks = new ArrayList<>();
+        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setProgress(0);
+
+        for (final HashMap.Entry<String, Uri> entry : images.entrySet()) {
+            final Uri file = entry.getValue();
+            final StorageReference imagesRef = storageRef.child("images/" + file.getLastPathSegment()+"_"
+                                                                +System.currentTimeMillis());
+            UploadTask uploadTask = imagesRef.putFile(file);
+            uploadTasks.add(uploadTask);
+
+            // Register observers to listen for when the download is done or if it fails
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle unsuccessful uploads
+                    toaster.shortToast("Upload failed: "+ file.getLastPathSegment()+" -"+exception.getMessage(), formActivity.this);
+
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                    Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                    while(!uriTask.isComplete());
+                    Uri downloadUri = uriTask.getResult();
+                    imagesUrl.add(downloadUri.toString());
+                    toaster.shortToast("Upload success: " + file.getLastPathSegment(), formActivity.this);
+                    mProgressTV.setText("Upload success: "+ file.getLastPathSegment()+".jpg");
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    mProgressTV.setText("Uploading "+ file.getLastPathSegment()+".jpg: "+(int)progress+"%");
                 }
             });
-        }
-        //if image(s) has been selected
-        else {
-            toaster.longToast("Sorry image upload isn't configured yet", formActivity.this);
-        }
+        }//for loop
+
+        Task finalTask = Tasks.whenAll(uploadTasks);
+        finalTask.addOnSuccessListener(new OnSuccessListener() {
+            @Override
+            public void onSuccess(Object o) {
+                toaster.shortToast("All images were uploaded", formActivity.this);
+                mProgressBar.setVisibility(View.GONE);
+                for (String s : imagesUrl){Log.d("imagesUrl", s);}
+                handleReportUpload(imagesUrl);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                toaster.shortToast("Some images weren't uploaded", formActivity.this);
+            }
+        });
+
     }
 
     public boolean activeNetwork () {

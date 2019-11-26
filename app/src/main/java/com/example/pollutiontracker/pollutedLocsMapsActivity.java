@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -107,11 +108,14 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                     toaster.shortToast("Confirmed location!\n"
                             +markerLoc.getLatitude()+", "+markerLoc.getLongitude()
                             +"\n"+pollutedLocCustomSearchET.getText(), pollutedLocsMapsActivity.this);
-
+                    /*
                     mMap.clear();
                     GeoQuery geoQuery = geoFire.queryAtLocation(
                             new GeoLocation(markerLoc.getLatitude(), markerLoc.getLongitude()), 1.0);
-                    addEventListenerToGeoQuery(geoQuery);
+                    addEventListenerToGeoQuery(geoQuery);*/
+                    Intent intent = new Intent(pollutedLocsMapsActivity.this, reportActivity.class);
+                    intent.putExtra("MarkerLoc", markerLoc);
+                    startActivity(intent);
                 }
             }
         });
@@ -219,6 +223,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                                 .title(report.address)
                                 .icon(getMarkerIcon(report.category))
                         );
+
                     }
 
                     @Override

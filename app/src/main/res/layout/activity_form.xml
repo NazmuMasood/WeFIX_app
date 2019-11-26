@@ -179,13 +179,13 @@
 
                 </RelativeLayout>
 
-                <RelativeLayout
-                    android:id="@+id/relativeLayout3"
+                <LinearLayout
+                    android:id="@+id/linearLayoutUpload"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginTop="128dp"
+                    android:orientation="vertical"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
 
@@ -194,17 +194,23 @@
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="false"
-                        android:indeterminate="true"
                         android:backgroundTint="@android:color/white"
+                        android:indeterminate="true"
                         android:indeterminateTint="#1a09d6"
-                        android:visibility="gone"/>
-                </RelativeLayout>
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/mProgressTV"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Upload : 0%" />
+                </LinearLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="164dp"
+                    android:layout_marginTop="184dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -222,6 +228,7 @@
                 </RelativeLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </LinearLayout>
     </ScrollView>
 
