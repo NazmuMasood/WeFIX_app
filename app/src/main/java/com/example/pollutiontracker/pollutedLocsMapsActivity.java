@@ -59,8 +59,9 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 
     private GoogleMap mMap;
     DatabaseReference ref; GeoFire geoFire;
-    Button reportButton, pollutedLocSearchTypeButton, pollutedLocCustomConfirmButton;
-    EditText pollutedLocCustomSearchET; ImageView pollutedLocMarkerIV;
+    Button reportButton, pollutedLocSearchTypeButton, pollutedLocCustomConfirmButton, showReportButton;
+    EditText pollutedLocCustomSearchET;
+    ImageView pollutedLocMarkerIV;
     int pollutedLocSearchType = 0;
     Location markerLoc; Geocoder geocoder; List<Address> addresses;
     Boolean tooZoomedOut = false;
@@ -80,6 +81,8 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         pollutedLocSearchTypeButton = findViewById(R.id.pollutedLocSearchTypeButton);
         pollutedLocCustomConfirmButton = findViewById(R.id.pollutedLocCustomConfirmButton);
         pollutedLocCustomConfirmButton.setVisibility(View.GONE);
+        showReportButton = findViewById(R.id.showReportButton);
+        showReportButton.setVisibility(View.GONE);
 
         pollutedLocCustomSearchET = findViewById(R.id.pollutedLocCustomSearchET);
         pollutedLocCustomSearchET.setFocusableInTouchMode(false);
@@ -98,6 +101,15 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         final DatabaseReference geoFireRef = FirebaseDatabase.getInstance().getReference("pollution-tracker/geofire");
         geoFire = new GeoFire(geoFireRef);
 
+        showReportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(pollutedLocsMapsActivity.this, reportActivity.class);
+                intent.putExtra("MarkerLoc", markerLoc);
+                intent.putExtra("MarkerAddress", pollutedLocCustomSearchET.getText().toString());
+                startActivity(intent);
+            }
+        });
         pollutedLocCustomConfirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,15 +120,11 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                     toaster.shortToast("Confirmed location!\n"
                             +markerLoc.getLatitude()+", "+markerLoc.getLongitude()
                             +"\n"+pollutedLocCustomSearchET.getText(), pollutedLocsMapsActivity.this);
-                    /*
                     mMap.clear();
                     GeoQuery geoQuery = geoFire.queryAtLocation(
                             new GeoLocation(markerLoc.getLatitude(), markerLoc.getLongitude()), 1.0);
-                    addEventListenerToGeoQuery(geoQuery);*/
-                    Intent intent = new Intent(pollutedLocsMapsActivity.this, reportActivity.class);
-                    intent.putExtra("MarkerLoc", markerLoc);
-                    intent.putExtra("MarkerAddress", pollutedLocCustomSearchET.getText().toString());
-                    startActivity(intent);
+                    addEventListenerToGeoQuery(geoQuery);
+                    showReportButton.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -148,6 +156,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                     pollutedLocSearchType = 0;
                     pollutedLocSearchTypeButton.setText("CUSTOM");
                     pollutedLocCustomConfirmButton.setVisibility(View.GONE);
+                    showReportButton.setVisibility(View.GONE);
                     pollutedLocCustomSearchET.setVisibility(View.GONE);
                     pollutedLocMarkerIV.setVisibility(View.GONE);
                     getPollutedLocations();
@@ -182,6 +191,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                 markerLoc = temp;
 
                 pollutedLocCustomSearchET.getText().clear();
+                showReportButton.setVisibility(View.GONE);
 
                 String address = getAddressFromLocation(markerLoc);
                 if (address!=null){

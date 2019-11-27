@@ -10,12 +10,18 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.smarteist.autoimageslider.SliderViewAdapter;
 
+import java.util.ArrayList;
+
 public class SliderAdapterExample extends SliderViewAdapter<SliderAdapterExample.SliderAdapterVH> {
 
-    private Context context;
+    private Context context; ArrayList<String> images; ArrayList<String> imgDescriptions;
 
-    public SliderAdapterExample(Context context) {
+    public SliderAdapterExample(Context context) { this.context = context; }
+
+    public SliderAdapterExample(Context context, ArrayList<String> images, ArrayList<String> imgDescriptions) {
         this.context = context;
+        this.images = images;
+        this.imgDescriptions = imgDescriptions;
     }
 
     @Override

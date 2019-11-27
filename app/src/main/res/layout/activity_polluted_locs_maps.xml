@@ -60,6 +60,15 @@
             map:layout_constraintVertical_bias="0.0" />
 
         <Button
+            android:id="@+id/showReportButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="see report"
+            map:layout_constraintTop_toBottomOf="@+id/pollutedLocCustomConfirmButton"
+            tools:layout_editor_absoluteX="215dp" />
+
+        <Button
             android:id="@+id/pollutedLocSearchTypeButton"
             android:layout_width="85dp"
             android:layout_height="40dp"

@@ -29,7 +29,8 @@ import java.util.Set;
 
 public class reportActivity extends AppCompatActivity {
     GeoFire geoFire; DatabaseReference ref; Location markerLoc; String place;
-    ArrayList<Report> reports; ArrayList<String> images; ArrayList<String> imgDescriptions;
+    ArrayList<Report> reports;
+    ArrayList<String> images; ArrayList<String> imgDescriptions;
     TextView reportStatTV;
     String sources = ""; int flagCount = 0;
     LinkedHashMap<String, String> reportStatMap; Set<String> sourceHashSet;
@@ -114,6 +115,7 @@ public class reportActivity extends AppCompatActivity {
         reportStatMap.put("No. of flags", "NA");
     }
 
+
     private void addEventListenerToGeoQuery(GeoQuery geoQuery) {
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
@@ -135,7 +137,7 @@ public class reportActivity extends AppCompatActivity {
                             updateSourcesKeyValue();
                             updateReportStatHashMap("Sources", sources);
                         }
-                        else { flagCount++; }
+                        flagCount++;
                         updateReportStatHashMap("No. of flags", Integer.toString(flagCount));
                         updateReportStatTV();
                     }
