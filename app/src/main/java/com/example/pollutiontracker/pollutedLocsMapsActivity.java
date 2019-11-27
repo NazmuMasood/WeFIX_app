@@ -115,6 +115,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                     addEventListenerToGeoQuery(geoQuery);*/
                     Intent intent = new Intent(pollutedLocsMapsActivity.this, reportActivity.class);
                     intent.putExtra("MarkerLoc", markerLoc);
+                    intent.putExtra("MarkerAddress", pollutedLocCustomSearchET.getText().toString());
                     startActivity(intent);
                 }
             }
