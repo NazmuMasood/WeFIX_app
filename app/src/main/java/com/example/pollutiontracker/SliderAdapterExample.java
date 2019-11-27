@@ -14,7 +14,8 @@ import java.util.ArrayList;
 
 public class SliderAdapterExample extends SliderViewAdapter<SliderAdapterExample.SliderAdapterVH> {
 
-    private Context context; ArrayList<String> images; ArrayList<String> imgDescriptions;
+    private Context context;
+    private ArrayList<String> images; private ArrayList<String> imgDescriptions;
 
     public SliderAdapterExample(Context context) { this.context = context; }
 
@@ -32,9 +33,16 @@ public class SliderAdapterExample extends SliderViewAdapter<SliderAdapterExample
 
     @Override
     public void onBindViewHolder(SliderAdapterVH viewHolder, int position) {
-        viewHolder.textViewDescription.setText("This is slider item " + position);
+        //viewHolder.textViewDescription.setText("This is slider item " + position);
 
-        switch (position) {
+        //for (int i = 0 ; i < images.size(); i++){
+            Glide.with(context)
+                    .load(images.get(position))
+                    .into(viewHolder.imageViewBackground);
+        //}
+        viewHolder.textViewDescription.setText(imgDescriptions.get(position));
+
+        /*switch (position) {
             case 0:
                 Glide.with(context)
                         .load("https://images.pexels.com/photos/218983/pexels-photo-218983.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260")
@@ -56,14 +64,20 @@ public class SliderAdapterExample extends SliderViewAdapter<SliderAdapterExample
                         .into(viewHolder.imageViewBackground);
                 break;
 
-        }
+        }*/
 
+    }
+
+    public void setItems(ArrayList<String> images, ArrayList<String> imgDescriptions){
+        this.images = images;
+        this.imgDescriptions = imgDescriptions;
     }
 
     @Override
     public int getCount() {
         //slider view count could be dynamic size
-        return 4;
+        //return 4;
+        return images.size();
     }
 
     class SliderAdapterVH extends SliderViewAdapter.ViewHolder {

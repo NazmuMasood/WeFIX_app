@@ -27,6 +27,7 @@
                     android:id="@+id/reportStatTV"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
                     android:text="Report stats" />
             </RelativeLayout>
 
@@ -36,7 +37,8 @@
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp">
 
                     <com.smarteist.autoimageslider.SliderView
                         android:id="@+id/imageSlider"

@@ -27,8 +27,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(activeNetwork()) {
-                    Intent intent = new Intent(MainActivity.this, pollutedLocsMapsActivity.class);
-                    startActivity(intent);
+                    if (checkPermission()) {
+                        Intent intent = new Intent(MainActivity.this, pollutedLocsMapsActivity.class);
+                        startActivity(intent);
+                    } else {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    }
                 }
                 else {
                     toaster.shortToast("No internet connection. Please try again..", MainActivity.this);
@@ -87,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION){
             if (grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                Intent intent =  new Intent(this, pinpointLocMapsActivity.class);
+                Intent intent =  new Intent(this, pollutedLocsMapsActivity.class);
                 startActivity(intent);
             }else {
                 toaster.shortToast("Grant location permission to access this feature",

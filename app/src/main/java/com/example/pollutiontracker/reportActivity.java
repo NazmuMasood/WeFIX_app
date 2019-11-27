@@ -31,7 +31,7 @@ public class reportActivity extends AppCompatActivity {
     GeoFire geoFire; DatabaseReference ref; Location markerLoc; String place;
     ArrayList<Report> reports;
     ArrayList<String> images; ArrayList<String> imgDescriptions;
-    TextView reportStatTV;
+    TextView reportStatTV; SliderView sliderView; SliderAdapterExample adapter;
     String sources = ""; int flagCount = 0;
     LinkedHashMap<String, String> reportStatMap; Set<String> sourceHashSet;
     HashMap<String, Integer> eachSourceFlagCount;
@@ -48,10 +48,6 @@ public class reportActivity extends AppCompatActivity {
         }
         else {return;}
 
-        SliderView sliderView = findViewById(R.id.imageSlider);
-        SliderAdapterExample adapter = new SliderAdapterExample(this);
-        sliderView.setSliderAdapter(adapter);
-
         reportStatTV = findViewById(R.id.reportStatTV);
         reportStatMap = new LinkedHashMap<>();
         sourceHashSet = new HashSet<>();
@@ -67,6 +63,11 @@ public class reportActivity extends AppCompatActivity {
         GeoQuery geoQuery = geoFire.queryAtLocation(
                 new GeoLocation(markerLoc.getLatitude(), markerLoc.getLongitude()), 1.0);
         addEventListenerToGeoQuery(geoQuery);
+
+        //setting up the image_slider
+        sliderView = findViewById(R.id.imageSlider);
+        adapter = new SliderAdapterExample(this, images, imgDescriptions);
+        sliderView.setSliderAdapter(adapter);
     }
 
     private void updateSourcesKeyValue(){
@@ -131,6 +132,7 @@ public class reportActivity extends AppCompatActivity {
                         Report report = dataSnapshot.getValue(Report.class);
                         Log.d("onDataChangeGeoFire", "report: location ="+report.location.latitude+", "+report.location.longitude);
                         reports.add(report);
+
                         //Updating the reports stat textview
                         if (!sourceHashSet.contains(report.source)){
                             sourceHashSet.add(report.source);
@@ -140,6 +142,16 @@ public class reportActivity extends AppCompatActivity {
                         flagCount++;
                         updateReportStatHashMap("No. of flags", Integer.toString(flagCount));
                         updateReportStatTV();
+
+                        //Populating the image_slider
+                        if (report.imagesUrl != null) {
+                            images.addAll(report.imagesUrl);
+                            for (int i=0; i<report.imagesUrl.size(); i++) {
+                                imgDescriptions.add(report.address);
+                            }
+                            adapter.setItems(images, imgDescriptions);
+                            adapter.notifyDataSetChanged();
+                        }
                     }
 
                     @Override
