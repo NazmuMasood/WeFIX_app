@@ -101,9 +101,9 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                     mMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
                 }
                 else {
-                    toaster.shortToast("Confirmed location!\n"
+                    /*toaster.shortToast("Confirmed location!\n"
                             +markerLoc.getLatitude()+", "+markerLoc.getLongitude()
-                            +"\n"+locationET.getText(), pinpointLocMapsActivity.this);
+                            +"\n"+locationET.getText(), pinpointLocMapsActivity.this);*/
 
                     Intent intent = new Intent(pinpointLocMapsActivity.this, formActivity.class);
                     intent.putExtra("LatLng", new LatLng(markerLoc.getLatitude(), markerLoc.getLongitude()) );
@@ -176,7 +176,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
             }
         });*/
 
-        toaster.longToast("Please drag map to set location..",
+        toaster.longToast("Please drag map to set location",
                 pinpointLocMapsActivity.this);
 
         //Map cameraMovedListener
@@ -326,7 +326,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         switch (resultCode) {
             case Activity.RESULT_OK:
                 // All required changes were successfully made
-                toast("User permitted gps on");
+                toast("GPS enabled");
 
                 userHandledFirstGpsPrompt = true;
 
@@ -334,7 +334,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 break;
             case Activity.RESULT_CANCELED:
                 // The user was asked to change settings, but chose not to
-                toast("User denied gps on");
+                toast("GPS denied");
 
                 //Very first time when activity starts and user cancels turn-on-gps prompt
                 if (!userHandledFirstGpsPrompt) {
@@ -343,12 +343,12 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                             @Override
                             public void onSuccess(Location location) {
                                 if (location != null) { //Last location available
-                                    toast("last location ");
+                                    toast("Last known location ");
                                     gpsLoc = location;
                                     moveToGPSLocation();
 
                                 } else { //No last location available
-                                    toast("custom location");
+                                    toast("Custom location");
                                     LatLng shaplaChottorLatLng = new LatLng(23.726623, 90.421576);
 
                                     Location temp = new Location(LocationManager.GPS_PROVIDER);

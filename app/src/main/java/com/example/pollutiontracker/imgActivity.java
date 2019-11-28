@@ -160,7 +160,7 @@ public class imgActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess() {
                             //holder.progressBar_picture.setVisibility(View.GONE);
-                            toaster.shortToast("Image successfully loaded", imgActivity.this);
+                            //toaster.shortToast("Image successfully loaded", imgActivity.this);
                         }
 
                         @Override

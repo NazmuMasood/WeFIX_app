@@ -50,27 +50,27 @@ public class graphActivity extends AppCompatActivity {
         BarDataSet barDataSet = new BarDataSet(barEntries, "Count");*/
         //Air flag count
         ArrayList<BarEntry> barEntries1 = new ArrayList<>();
-        barEntries1.add(new BarEntry(0, eachCategoryFlagCount.get(categories.get(0))));
+        barEntries1.add(new BarEntry(1, eachCategoryFlagCount.get(categories.get(0))));
         BarDataSet barDataSet1 = new BarDataSet(barEntries1, categories.get(0));
         barDataSet1.setColor(ContextCompat.getColor(graphActivity.this, R.color.colorAir));
         //Water flag count
         ArrayList<BarEntry> barEntries2 = new ArrayList<>();
-        barEntries2.add(new BarEntry(1, eachCategoryFlagCount.get(categories.get(1))));
+        barEntries2.add(new BarEntry(2, eachCategoryFlagCount.get(categories.get(1))));
         BarDataSet barDataSet2 = new BarDataSet(barEntries2, categories.get(1));
         barDataSet2.setColor(ContextCompat.getColor(graphActivity.this,R.color.colorWater));
         //Noise flag count
         ArrayList<BarEntry> barEntries3 = new ArrayList<>();
-        barEntries3.add(new BarEntry(2, eachCategoryFlagCount.get(categories.get(2))));
+        barEntries3.add(new BarEntry(3, eachCategoryFlagCount.get(categories.get(2))));
         BarDataSet barDataSet3 = new BarDataSet(barEntries3, categories.get(2));
         barDataSet3.setColor(ContextCompat.getColor(graphActivity.this,R.color.colorNoise));
         //Land flag count
         ArrayList<BarEntry> barEntries4 = new ArrayList<>();
-        barEntries4.add(new BarEntry(3, eachCategoryFlagCount.get(categories.get(3))));
+        barEntries4.add(new BarEntry(4, eachCategoryFlagCount.get(categories.get(3))));
         BarDataSet barDataSet4 = new BarDataSet(barEntries4, categories.get(3));
         barDataSet4.setColor(ContextCompat.getColor(graphActivity.this,R.color.colorLand));
         //Others flag count
         ArrayList<BarEntry> barEntries5 = new ArrayList<>();
-        barEntries5.add(new BarEntry(4, eachCategoryFlagCount.get(categories.get(4))));
+        barEntries5.add(new BarEntry(5, eachCategoryFlagCount.get(categories.get(4))));
         BarDataSet barDataSet5 = new BarDataSet(barEntries5, categories.get(4));
         barDataSet5.setColor(ContextCompat.getColor(graphActivity.this,R.color.colorOthers));
 

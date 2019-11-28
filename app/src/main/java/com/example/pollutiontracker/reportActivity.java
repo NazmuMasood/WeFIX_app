@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
@@ -38,7 +39,7 @@ public class reportActivity extends AppCompatActivity {
     String sources = ""; int flagCount = 0;
     LinkedHashMap<String, String> reportStatMap; Set<String> sourceHashSet;
     HashMap<String, Integer> eachCategoryFlagCount;
-    Button graphButton;
+    Button graphButton; RelativeLayout locImgPlaceholerRL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,7 @@ public class reportActivity extends AppCompatActivity {
         }
         else {return;}
 
+        locImgPlaceholerRL = findViewById(R.id.locImgPlaceholderRL);
         graphButton = findViewById(R.id.graphButton);
         graphButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,6 +168,9 @@ public class reportActivity extends AppCompatActivity {
 
                         //Populating the image_slider
                         if (report.imagesUrl != null) {
+                            if(locImgPlaceholerRL.getVisibility()==View.VISIBLE){
+                                locImgPlaceholerRL.setVisibility(View.GONE);
+                            }
                             images.addAll(report.imagesUrl);
                             for (int i=0; i<report.imagesUrl.size(); i++) {
                                 imgDescriptions.add(report.address);

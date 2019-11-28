@@ -114,7 +114,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
             @Override
             public void onClick(View view) {
                 if (tooZoomedOut){
-                    mMap.animateCamera( CameraUpdateFactory.zoomTo( 15.0f ) );
+                    mMap.animateCamera( CameraUpdateFactory.zoomTo( 14.885f ) );
                 }
                 else {
                     /*toaster.shortToast("Confirmed location!\n"
@@ -203,7 +203,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 
                 //Zoom-in to location if too much zoomed-out
                 float zoom = mMap.getCameraPosition().zoom;
-                if (zoom<15.0f){
+                if (zoom<14.885f){
                     tooZoomedOut = true;
                     pollutedLocCustomConfirmButton.setText("PINPOINT");
                 }

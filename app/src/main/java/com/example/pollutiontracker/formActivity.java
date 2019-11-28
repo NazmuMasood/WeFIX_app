@@ -106,7 +106,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             mAddress = bundle.getString("address");
             LatLng tmpLatLng = bundle.getParcelable("LatLng");
             mLatLng = new mLatLng(tmpLatLng.latitude, tmpLatLng.longitude);
-            toaster.shortToast("address "+mAddress, formActivity.this);
+            //toaster.shortToast("address "+mAddress, formActivity.this);
         }
         else{
             toaster.shortToast("Sorry couldn't find location data. Please set location again..", formActivity.this);
@@ -281,6 +281,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
         final ArrayList<UploadTask> uploadTasks = new ArrayList<>();
         mProgressBar.setVisibility(View.VISIBLE);
+        mProgressTV.setVisibility(View.VISIBLE);
         mProgressBar.setProgress(0);
 
         for (final HashMap.Entry<String, Uri> entry : images.entrySet()) {
@@ -306,8 +307,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     while(!uriTask.isComplete());
                     Uri downloadUri = uriTask.getResult();
                     imagesUrl.add(downloadUri.toString());
-                    toaster.shortToast("Upload success: " + file.getLastPathSegment(), formActivity.this);
-                    mProgressTV.setText("Upload success: "+ file.getLastPathSegment()+".jpg");
+                    //toaster.shortToast("Upload success: " + file.getLastPathSegment(), formActivity.this);
+                    mProgressTV.setText("Upload success: "+ file.getLastPathSegment());
                 }
             }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -324,6 +325,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onSuccess(Object o) {
                 toaster.shortToast("All images were uploaded", formActivity.this);
                 mProgressBar.setVisibility(View.GONE);
+                mProgressTV.setVisibility(View.GONE);
                 for (String s : imagesUrl){Log.d("imagesUrl", s);}
                 handleReportUpload(imagesUrl);
             }
@@ -565,7 +567,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onClick(View v) {
         ImageView imageView = imgLL.findViewWithTag(v.getTag());
-        toaster.longToast("You clicked image : "+imageView.getTag(), formActivity.this);
+        //toaster.longToast("You clicked image : "+imageView.getTag(), formActivity.this);
 
         String key = (String) imageView.getTag();
         Uri thisImageUri = images.get(key);
@@ -581,7 +583,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     public boolean onLongClick(View v) {
         //return false;
         ImageView imageView = imgLL.findViewWithTag(v.getTag());
-        toaster.longToast("You long-pressed image : "+imageView.getTag(), formActivity.this);
+        toaster.longToast("Removed image : "+imageView.getTag(), formActivity.this);
 
         String key = (String) imageView.getTag();
         images.remove(key);
