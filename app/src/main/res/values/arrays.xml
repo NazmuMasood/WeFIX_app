@@ -11,6 +11,7 @@
     <string-array name="source_array">
         <item>Household</item>
         <item>Industry</item>
+        <item>Waste dumping</item>
     </string-array>
     
     <string-array name="extent_array">

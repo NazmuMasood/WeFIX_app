@@ -21,7 +21,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".reportActivity"></activity>
+        <activity android:name=".graphActivity"></activity>
+        <activity android:name=".reportActivity" />
         <activity
             android:name=".imgActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

@@ -3,9 +3,12 @@ package com.example.pollutiontracker;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
@@ -34,7 +37,8 @@ public class reportActivity extends AppCompatActivity {
     TextView reportStatTV; SliderView sliderView; SliderAdapterExample adapter;
     String sources = ""; int flagCount = 0;
     LinkedHashMap<String, String> reportStatMap; Set<String> sourceHashSet;
-    HashMap<String, Integer> eachSourceFlagCount;
+    HashMap<String, Integer> eachCategoryFlagCount;
+    Button graphButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +52,20 @@ public class reportActivity extends AppCompatActivity {
         }
         else {return;}
 
+        graphButton = findViewById(R.id.graphButton);
+        graphButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(reportActivity.this, graphActivity.class);
+                intent.putExtra("EachCategoryFlagCount", eachCategoryFlagCount);
+                startActivity(intent);
+            }
+        });
         reportStatTV = findViewById(R.id.reportStatTV);
         reportStatMap = new LinkedHashMap<>();
         sourceHashSet = new HashSet<>();
-        eachSourceFlagCount = new HashMap<>();
+        eachCategoryFlagCount = new HashMap<>();
+        prepareEachCategoryFlagCountHashMap();
         prepareReportStatHashMap();
         updateReportStatTV();
         reports = new ArrayList<>();
@@ -116,6 +130,12 @@ public class reportActivity extends AppCompatActivity {
         reportStatMap.put("No. of flags", "NA");
     }
 
+    private void prepareEachCategoryFlagCountHashMap() {
+        String[] categories = getResources().getStringArray(R.array.category_array);
+        for (String category : categories){
+            eachCategoryFlagCount.put(category, 0);
+        }
+    }
 
     private void addEventListenerToGeoQuery(GeoQuery geoQuery) {
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -139,6 +159,7 @@ public class reportActivity extends AppCompatActivity {
                             updateSourcesKeyValue();
                             updateReportStatHashMap("Sources", sources);
                         }
+                        eachCategoryFlagCount.put(report.category, eachCategoryFlagCount.get(report.category)+1);
                         flagCount++;
                         updateReportStatHashMap("No. of flags", Integer.toString(flagCount));
                         updateReportStatTV();
@@ -174,7 +195,7 @@ public class reportActivity extends AppCompatActivity {
             @Override
             public void onGeoQueryReady() {
                 Log.d("onGeoQReady", "All initial data has been loaded and events have been fired!");
-                for (Report report : reports){
+                /*for (Report report : reports){
                     Log.d("onGeoQReady", "address: "+report.address);
                     if (report.imagesUrl != null) {
                         images.addAll(report.imagesUrl);
@@ -189,7 +210,7 @@ public class reportActivity extends AppCompatActivity {
                 for (String s: imgDescriptions) {
                     Log.d("onGeoQReady", "imgDescription: " + s);
                 }
-                Log.d("onGeoQReady", "Reports count: " + reports.size());
+                Log.d("onGeoQReady", "Reports count: " + reports.size());*/
                 updateReportStatTV();
             }
 
