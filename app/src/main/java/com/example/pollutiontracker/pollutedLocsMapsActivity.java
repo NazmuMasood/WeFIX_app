@@ -117,9 +117,9 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                     mMap.animateCamera( CameraUpdateFactory.zoomTo( 15.0f ) );
                 }
                 else {
-                    toaster.shortToast("Confirmed location!\n"
+                    /*toaster.shortToast("Confirmed location!\n"
                             +markerLoc.getLatitude()+", "+markerLoc.getLongitude()
-                            +"\n"+pollutedLocCustomSearchET.getText(), pollutedLocsMapsActivity.this);
+                            +"\n"+pollutedLocCustomSearchET.getText(), pollutedLocsMapsActivity.this);*/
                     mMap.clear();
                     GeoQuery geoQuery = geoFire.queryAtLocation(
                             new GeoLocation(markerLoc.getLatitude(), markerLoc.getLongitude()), 1.0);
