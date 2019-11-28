@@ -33,15 +33,14 @@ public class SliderAdapterExample extends SliderViewAdapter<SliderAdapterExample
 
     @Override
     public void onBindViewHolder(SliderAdapterVH viewHolder, int position) {
-        //viewHolder.textViewDescription.setText("This is slider item " + position);
 
-        //for (int i = 0 ; i < images.size(); i++){
-            Glide.with(context)
-                    .load(images.get(position))
-                    .into(viewHolder.imageViewBackground);
-        //}
+        Glide.with(context)
+                .load(images.get(position))
+                .into(viewHolder.imageViewBackground);
+
         viewHolder.textViewDescription.setText(imgDescriptions.get(position));
 
+        //viewHolder.textViewDescription.setText("This is slider item " + position);
         /*switch (position) {
             case 0:
                 Glide.with(context)

@@ -313,7 +313,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 @Override
                 public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                     double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    mProgressTV.setText("Uploading "+ file.getLastPathSegment()+".jpg: "+(int)progress+"%");
+                    mProgressTV.setText("Uploading "+ file.getLastPathSegment()+": "+(int)progress+"%");
                 }
             });
         }//for loop

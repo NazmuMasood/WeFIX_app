@@ -28,23 +28,33 @@
             map:layout_constraintStart_toStartOf="parent"
             map:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/pollutedLocCustomSearchET"
-            android:layout_width="175dp"
-            android:layout_height="40dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="6dp"
-            android:background="@android:color/white"
-            android:cursorVisible="false"
-            android:ems="10"
-            android:hint="@string/loading_location"
-            android:inputType="textPersonName"
-            android:paddingStart="5dp"
-            android:textSize="14sp"
-            map:layout_constraintBottom_toBottomOf="parent"
+            android:orientation="vertical"
             map:layout_constraintEnd_toStartOf="@+id/pollutedLocCustomConfirmButton"
-            map:layout_constraintTop_toTopOf="parent"
-            map:layout_constraintVertical_bias="0.0" />
+            map:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/pollutedLocCustomSearchET"
+                android:layout_width="175dp"
+                android:layout_height="40dp"
+                android:background="@android:color/white"
+                android:cursorVisible="false"
+                android:ems="10"
+                android:hint="@string/loading_location"
+                android:inputType="textPersonName"
+                android:paddingStart="5dp"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/showReportButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="see report" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/pollutedLocCustomConfirmButton"
@@ -58,15 +68,6 @@
             map:layout_constraintEnd_toStartOf="@+id/pollutedLocSearchTypeButton"
             map:layout_constraintTop_toTopOf="parent"
             map:layout_constraintVertical_bias="0.0" />
-
-        <Button
-            android:id="@+id/showReportButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="see report"
-            map:layout_constraintTop_toBottomOf="@+id/pollutedLocCustomConfirmButton"
-            tools:layout_editor_absoluteX="215dp" />
 
         <Button
             android:id="@+id/pollutedLocSearchTypeButton"
