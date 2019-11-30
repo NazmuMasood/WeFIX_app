@@ -14,6 +14,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
+            android:id="@+id/formParentLL"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -70,8 +71,8 @@
                             android:layout_weight="9"
                             android:background="@android:color/white"
                             android:cursorVisible="false"
-                            android:focusable="false"
                             android:ems="10"
+                            android:focusable="false"
                             android:hint="@string/loading_location"
                             android:inputType="textPersonName"
                             android:paddingStart="10dp" />

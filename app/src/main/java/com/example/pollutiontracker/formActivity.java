@@ -11,9 +11,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -46,6 +50,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -56,13 +61,16 @@ import com.google.firebase.storage.UploadTask;
 
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -72,7 +80,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         View.OnLongClickListener,
         View.OnClickListener
 {
-    Boolean allFieldsSatisfy = true;
+    Boolean allFieldsSatisfy = true; LinearLayout formParentLL;
 
     EditText locationET;
     Spinner categorySpinner, sourceSpinner, extentSpinner;
@@ -82,14 +90,17 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     //Image related
     static final int REQUEST_IMAGE_CHOOSE = 2, REQUEST_IMAGE_CAPTURE = 1;
     Uri mImageUri;
-    HashMap<String, Uri> images = new HashMap<>(); ArrayList<String> imagesUrl = new ArrayList<>();
+    LinkedHashMap<String, Uri> images = new LinkedHashMap<>(); //stores selected image's uri
+    LinkedHashMap<Uri, String> imagesFilePath = new LinkedHashMap<>();//stores each image's absolute path
+    LinkedHashMap<Uri, Integer> imagesIntentType = new LinkedHashMap<>();//stores each image's intent type i.e. gallery or camera
+    ArrayList<String> imagesUrl = new ArrayList<>();//stores uploaded image's firebase storage url
     RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB;
     ProgressBar mProgressBar; TextView mProgressTV;
         //explicitly camera related
     String currentPhotoPath; //Absolute path where captured images would be stored
     Uri photoURI;//save this uri in onSaveInstance state else it might become null when..
                  //..user rotates device while using camera
-    private static final int MY_CAMERA_PERMISSION_CODE = 100;
+    private static final int MY_CAMERA_PERMISSION_CODE = 100, READ_EXTERNAL_STORAGE_CODE = 200;
         //Image intent dialog
     ImageButton cameraIB, galleryIB; Dialog imgIntentDialog;
 
@@ -115,6 +126,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             startActivity(intent);
         }
 
+        formParentLL = findViewById(R.id.formParentLL);
         locationET = findViewById(R.id.locationET);
         locationET.setText(mAddress);
         locationET.setOnClickListener(new View.OnClickListener() {
@@ -284,49 +296,85 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         mProgressTV.setVisibility(View.VISIBLE);
         mProgressBar.setProgress(0);
 
-        for (final HashMap.Entry<String, Uri> entry : images.entrySet()) {
-            final Uri file = entry.getValue();
-            final StorageReference imagesRef = storageRef.child("images/" + file.getLastPathSegment()+"_"
-                                                                +System.currentTimeMillis());
-            UploadTask uploadTask = imagesRef.putFile(file);
-            uploadTasks.add(uploadTask);
+        for (final LinkedHashMap.Entry<String, Uri> entry : images.entrySet()) {
+            try {
+                final Uri file = entry.getValue();
+                String imageTypePath;
+                if (imagesIntentType.get(file)==1) { imageTypePath = "IMG_GALLERY";}
+                else { imageTypePath = "IMG_CAMERA"; }
+                final StorageReference imagesRef = storageRef.child("images/"
+                      + imageTypePath
+                    //+ file.getLastPathSegment()
+                    //+ "_"+ System.currentTimeMillis()
+                    +"_"+ new SimpleDateFormat("ddMMyyyy_HH:mm:ss").format(new Date())
+                );
 
-            // Register observers to listen for when the download is done or if it fails
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle unsuccessful uploads
-                    toaster.shortToast("Upload failed: "+ file.getLastPathSegment()+" -"+exception.getMessage(), formActivity.this);
+                UploadTask uploadTask;
 
+                if (imagesIntentType.get(file)==1) { //Compressing image if intent "Gallery"
+                    //Bitmap bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), file);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 8;
+                    Bitmap bmp = BitmapFactory.decodeFile(imagesFilePath.get(file), options);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                    //Fixing rotated images
+                    int imageRotation = getImageRotation(new File(currentPhotoPath));
+                    Log.d("imgRotation", imageRotation+"");
+                    if (imageRotation != 0) {
+                        //bmp = getBitmapRotatedByDegree(bmp, imageRotation);
+                        Matrix matrix = new Matrix();
+                        matrix.preRotate(90);
+                        bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+                    }
+
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                    byte[] data = baos.toByteArray();
+
+                    uploadTask = imagesRef.putBytes(data);
+                }else {
+                    uploadTask = imagesRef.putFile(file);
                 }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                    Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-                    while(!uriTask.isComplete());
-                    Uri downloadUri = uriTask.getResult();
-                    imagesUrl.add(downloadUri.toString());
-                    //toaster.shortToast("Upload success: " + file.getLastPathSegment(), formActivity.this);
-                    mProgressTV.setText("Upload success: "+ file.getLastPathSegment());
-                }
-            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    mProgressTV.setText("Uploading "+ file.getLastPathSegment()+": "+(int)progress+"%");
-                }
-            });
+                uploadTasks.add(uploadTask);
+
+                // Register observers to listen for when the download is done or if it fails
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        toaster.shortToast("Upload failed: " + file.getLastPathSegment() + " -" + exception.getMessage(), formActivity.this);
+
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                        Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                        while (!uriTask.isComplete()) ;
+                        Uri downloadUri = uriTask.getResult();
+                        imagesUrl.add(downloadUri.toString());
+                        //toaster.shortToast("Upload success: " + file.getLastPathSegment(), formActivity.this);
+                        mProgressTV.setText("Upload success: " + file.getLastPathSegment());
+                    }
+                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        mProgressTV.setText("Uploading " + file.getLastPathSegment() + ": " + (int) progress + "%");
+                    }
+                });
+            }//try block
+            catch (Exception e){e.printStackTrace();}
         }//for loop
 
-        Task finalTask = Tasks.whenAll(uploadTasks);
-        finalTask.addOnSuccessListener(new OnSuccessListener() {
+        Task allTasks = Tasks.whenAll(uploadTasks);
+        allTasks.addOnSuccessListener(new OnSuccessListener() {
             @Override
             public void onSuccess(Object o) {
                 toaster.shortToast("All images were uploaded", formActivity.this);
                 mProgressBar.setVisibility(View.GONE);
                 mProgressTV.setVisibility(View.GONE);
-                for (String s : imagesUrl){Log.d("imagesUrl", s);}
+                //for (String s : imagesUrl){Log.d("imagesUrl", s);}
                 handleReportUpload(imagesUrl);
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -335,7 +383,45 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 toaster.shortToast("Some images weren't uploaded", formActivity.this);
             }
         });
+    }
 
+    //Handling the rotation of the image
+    private static int getImageRotation(
+            final File imageFile
+    ) {
+
+        ExifInterface exif = null;
+        int exifRotation = 0;
+
+        try {
+            exif = new ExifInterface(imageFile.getPath());
+            exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (exif == null)
+            return 0;
+        else
+            return exifToDegrees(exifRotation);
+    }
+
+    private static int exifToDegrees(int rotation) {
+        if (rotation == ExifInterface.ORIENTATION_ROTATE_90)
+            return 90;
+        else if (rotation == ExifInterface.ORIENTATION_ROTATE_180)
+            return 180;
+        else if (rotation == ExifInterface.ORIENTATION_ROTATE_270)
+            return 270;
+
+        return 0;
+    }
+
+    private static Bitmap getBitmapRotatedByDegree(Bitmap bitmap, int rotationDegree) {
+        Matrix matrix = new Matrix();
+        matrix.preRotate(rotationDegree);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
     public boolean activeNetwork () {
@@ -360,6 +446,24 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             if (photoURI!=null) {
 
                 mImageUri = photoURI;
+
+                Log.d("currPhotoPath", currentPhotoPath);
+                try {
+                //Compressing the image
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 8;
+                Bitmap bmp = BitmapFactory.decodeFile(currentPhotoPath, options);
+                //Fixing rotated images
+                int imageRotation = getImageRotation(new File(currentPhotoPath));
+                if (imageRotation != 0)
+                    bmp = getBitmapRotatedByDegree(bmp, imageRotation);
+                FileOutputStream fos = new FileOutputStream(currentPhotoPath);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 70, fos);
+                fos.close();
+                }catch (Exception e){e.printStackTrace();}
+                //also store the intent type (gallery/image) of each image to a map
+                imagesIntentType.put(mImageUri, 0);//0 means its camera intent
+
                 setPicToScrollview();
 
             }
@@ -380,6 +484,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 while (currentImgSelect < countClipData) {
 
                     mImageUri = data.getClipData().getItemAt(currentImgSelect).getUri();
+                    this.grantUriPermission(getPackageName(), mImageUri,
+                            FLAG_GRANT_READ_URI_PERMISSION
+                    //                | FLAG_GRANT_WRITE_URI_PERMISSION
+                    );
+                    currentPhotoPath = ImageFilePathGallery.getPath(formActivity.this, mImageUri);
+                    Log.d("currPhotoPath", currentPhotoPath);
+                    //also string the intent type (gallery/image) of each image to a map
+                    imagesIntentType.put(mImageUri, 1);//1 means its gallery intent
                     setPicToScrollview();
 
                     currentImgSelect++;
@@ -390,6 +502,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             else if (data.getData() != null){
 
                 mImageUri = data.getData();
+                this.grantUriPermission(getPackageName(), mImageUri,
+                        FLAG_GRANT_READ_URI_PERMISSION
+                               // | FLAG_GRANT_WRITE_URI_PERMISSION
+                );
+                currentPhotoPath = ImageFilePathGallery.getPath(formActivity.this, mImageUri);
+                Log.d("currPhotoPath", currentPhotoPath);
+                //also string the intent type (gallery/image) of each image to a map
+                imagesIntentType.put(mImageUri, 1);//1 means its gallery intent
                 setPicToScrollview();
 
             }// else if [ data.getData() ] ends
@@ -409,9 +529,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        //currentPhotoPath = image.getAbsolutePath();
-        currentPhotoPath = image.getName();
-        Log.d("createImageFile", "image.getAbsolutePath="+image.getAbsolutePath());
+        currentPhotoPath = image.getAbsolutePath();
+        //currentPhotoPath = image.getName();
+        //Log.d("createImageFile", "image.getAbsolutePath="+image.getAbsolutePath());
         Log.d("createImageFile", "currentPhotoPath="+currentPhotoPath);
         return image;
     }
@@ -439,6 +559,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
+    private void dispatchGalleryImageIntent() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, REQUEST_IMAGE_CHOOSE);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
@@ -454,6 +582,18 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             else
             {
                 Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+            }
+        }
+        if (requestCode == READ_EXTERNAL_STORAGE_CODE)
+        {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(this, "Storage permission granted", Toast.LENGTH_LONG).show();
+                dispatchGalleryImageIntent();
+            }
+            else
+            {
+                Toast.makeText(this, "Storage permission denied", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -479,11 +619,12 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         }//if intentType == camera
 
         if (intentType.equals("gallery")) {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(intent, REQUEST_IMAGE_CHOOSE);
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_CODE);
+            }//if write_external_storage permission already granted
+            else {
+                dispatchGalleryImageIntent();
+            }
         }//if intentType == gallery
     }
 
@@ -531,9 +672,26 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             tempImg.setTag("IMG_" + time);
             imgLL.addView(tempImg);
 
+            //Displaying message on how to remove a selected image
+            if (images.isEmpty()){
+                final Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
+                        "To remove selected image, long-press them", Snackbar.LENGTH_INDEFINITE);
+                snackbar
+                .setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        snackbar.dismiss();
+                    }
+                })
+                .show();
+            }
             images.put("IMG_" + time, mImageUri);
             tempImg.setOnLongClickListener(this);
             tempImg.setOnClickListener(this);
+
+            //also storing the filepath of each image to a map
+            imagesFilePath.put(mImageUri, currentPhotoPath);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -698,9 +856,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     // getRealPathFromURI(Uri contentURI)
-    /*public String getRealPathFromURI(Uri contentURI) {
+    /*public static String getRealPathFromURI(Context context, Uri contentURI) {
         String result;
-        Cursor cursor = this.getContentResolver().query(contentURI, null,
+        Cursor cursor = context.getContentResolver().query(contentURI, null,
                 null, null, null);
 
         if (cursor == null) { // Source is Dropbox or other similar local file
@@ -714,7 +872,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 result = cursor.getString(idx);
             } catch (Exception e) {
                 //AppLog.handleException(ImageHelper.class.getName(), e);
-                Toast.makeText(this, "Can't get imgPath from Uri", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Can't get imgPath from Uri", Toast.LENGTH_SHORT).show();
 
                 result = "";
             }
