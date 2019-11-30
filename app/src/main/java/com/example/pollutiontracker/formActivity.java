@@ -80,7 +80,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         View.OnLongClickListener,
         View.OnClickListener
 {
-    Boolean allFieldsSatisfy = true; LinearLayout formParentLL;
+    Boolean allFieldsSatisfy = true; LinearLayout formParentLL; String deviceModel = GetDeviceInfo.getDeviceName();
 
     EditText locationET;
     Spinner categorySpinner, sourceSpinner, extentSpinner;
@@ -303,7 +303,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 if (imagesIntentType.get(file)==1) { imageTypePath = "IMG_GALLERY";}
                 else { imageTypePath = "IMG_CAMERA"; }
                 final StorageReference imagesRef = storageRef.child("images/"
-                      + imageTypePath
+                    + imageTypePath
+                    +"_"+ deviceModel
                     //+ file.getLastPathSegment()
                     //+ "_"+ System.currentTimeMillis()
                     +"_"+ new SimpleDateFormat("ddMMyyyy_HH:mm:ss").format(new Date())
@@ -675,7 +676,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             //Displaying message on how to remove a selected image
             if (images.isEmpty()){
                 final Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
-                        "To remove selected image, long-press on them", Snackbar.LENGTH_INDEFINITE);
+                        "To remove selected images, long-press on them", Snackbar.LENGTH_INDEFINITE);
                 snackbar
                 .setAction("Dismiss", new View.OnClickListener() {
                     @Override
