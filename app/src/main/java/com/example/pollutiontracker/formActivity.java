@@ -675,7 +675,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             //Displaying message on how to remove a selected image
             if (images.isEmpty()){
                 final Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
-                        "To remove selected image, long-press them", Snackbar.LENGTH_INDEFINITE);
+                        "To remove selected image, long-press on them", Snackbar.LENGTH_INDEFINITE);
                 snackbar
                 .setAction("Dismiss", new View.OnClickListener() {
                     @Override
