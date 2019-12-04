@@ -94,5 +94,10 @@ public class graphActivity extends AppCompatActivity {
         barChart.setDragEnabled(true);
         barChart.setScaleEnabled(true);
 
+        //removing the background grid on graph
+        barChart.getAxisRight().setDrawGridLines(false);
+        barChart.getAxisLeft().setDrawGridLines(false);
+        barChart.getXAxis().setDrawGridLines(false);
+
     }
 }

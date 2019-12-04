@@ -147,7 +147,7 @@
                     android:id="@+id/imgRelativeLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -168,12 +168,30 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
-                            <ImageButton
-                                android:id="@+id/imgIB"
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
-                                android:src="@drawable/ic_insert_picture_60dp"
-                                tools:srcCompat="@drawable/ic_insert_picture_60dp" />
+                            <LinearLayout
+                                android:id="@+id/setImgIconLL"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:layout_marginTop="20dp"
+                                android:layout_marginEnd="8dp"
+                                android:orientation="vertical">
+
+                                <ImageButton
+                                    android:id="@+id/imgIB"
+                                    android:layout_width="64dp"
+                                    android:layout_height="64dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_insert_picture_60dp"
+                                    tools:srcCompat="@drawable/ic_insert_picture_60dp" />
+
+                                <TextView
+                                    android:id="@+id/setImgIconTV"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Set Image"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
 
                         </LinearLayout>
                     </HorizontalScrollView>
@@ -184,7 +202,7 @@
                     android:id="@+id/linearLayoutUpload"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="128dp"
+                    android:layout_marginTop="130dp"
                     android:orientation="vertical"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -212,7 +230,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="184dp"
+                    android:layout_marginTop="188dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"

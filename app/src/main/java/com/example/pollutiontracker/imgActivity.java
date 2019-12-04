@@ -30,9 +30,12 @@ import com.squareup.picasso.Transformation;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static com.example.pollutiontracker.formActivity.getImageRotation;
 
 public class imgActivity extends AppCompatActivity {
-    ImageView imgFrameIV; Uri mImageUri;
+    ImageView imgFrameIV; Uri mImageUri; String currentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,7 @@ public class imgActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null){
             mImageUri = getIntent().getParcelableExtra("ImageUri");
+            currentPhotoPath = getIntent().getStringExtra("CurrentPhotoPath");
 
            /*
            Picasso.get()
@@ -137,6 +141,15 @@ public class imgActivity extends AppCompatActivity {
                     double aspectRatio = (double) source.getHeight() / (double) source.getWidth();
                     int targetHeight = (int) (targetWidth * aspectRatio);
                     Bitmap result = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false);
+
+                    //fixing rotated (gallery) images
+                    int imageRotation = getImageRotation(new File(currentPhotoPath));
+                    if (imageRotation != 0) {
+                        Matrix matrix = new Matrix();
+                        matrix.preRotate(90);
+                        result = Bitmap.createBitmap(result, 0, 0, result.getWidth(), result.getHeight(), matrix, true);
+                    }
+
                     if (result != source) {
                         // Same bitmap is returned if sizes are the same
                         source.recycle();
@@ -173,6 +186,7 @@ public class imgActivity extends AppCompatActivity {
 
         }
     }
+
 
     ///-----GAP------//
     //compress image

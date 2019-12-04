@@ -41,6 +41,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
@@ -51,6 +52,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -94,7 +98,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     LinkedHashMap<Uri, String> imagesFilePath = new LinkedHashMap<>();//stores each image's absolute path
     LinkedHashMap<Uri, Integer> imagesIntentType = new LinkedHashMap<>();//stores each image's intent type i.e. gallery or camera
     ArrayList<String> imagesUrl = new ArrayList<>();//stores uploaded image's firebase storage url
+    ArrayList<Uri> imagesUri = new ArrayList<>();
     RelativeLayout imgRL; LinearLayout imgLL; ImageButton imgIB;
+    LinearLayout setImgIconLL; TextView setImgIconTV;
     ProgressBar mProgressBar; TextView mProgressTV;
         //explicitly camera related
     String currentPhotoPath; //Absolute path where captured images would be stored
@@ -106,6 +112,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
     //Location data which we got from pinpointLocMapsActivity
     com.example.pollutiontracker.mLatLng mLatLng; String mAddress;
+
+    //auth
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +136,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         formParentLL = findViewById(R.id.formParentLL);
+        setImgIconLL = findViewById(R.id.setImgIconLL);
+        setImgIconTV = findViewById(R.id.setImgIconTV);
         locationET = findViewById(R.id.locationET);
         locationET.setText(mAddress);
         locationET.setOnClickListener(new View.OnClickListener() {
@@ -188,6 +199,37 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
     }
+
+
+    /*
+     *
+     * Dealing with issues about anonymous uploads
+     * */
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            // do your stuff
+        } else {
+            signInAnonymously();
+        }
+    }
+    private void signInAnonymously() {
+        mAuth.signInAnonymously().addOnSuccessListener(this, new  OnSuccessListener<AuthResult>() {
+            @Override
+            public void onSuccess(AuthResult authResult) {
+                // do your stuff
+            }
+        })
+        .addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e("signInAnonFail", "signInAnonymously:FAILURE", exception);
+            }
+        });
+    }
+
 
     /*
     *
@@ -296,6 +338,15 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         mProgressTV.setVisibility(View.VISIBLE);
         mProgressBar.setProgress(0);
 
+        /*for(LinkedHashMap.Entry<String, Uri> entry : images.entrySet()){
+            imagesUri.add(entry.getValue());
+        }
+
+        for (Uri uri : imagesUri){
+            Log.d("imagesUri", uri.toString());
+        }*/
+
+        //for (final Uri file : imagesUri){
         for (final LinkedHashMap.Entry<String, Uri> entry : images.entrySet()) {
             try {
                 final Uri file = entry.getValue();
@@ -306,8 +357,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     + imageTypePath
                     +"_"+ deviceModel
                     //+ file.getLastPathSegment()
-                    //+ "_"+ System.currentTimeMillis()
-                    +"_"+ new SimpleDateFormat("ddMMyyyy_HH:mm:ss").format(new Date())
+                    + "_"+ System.currentTimeMillis()
+                    //+"_"+ new SimpleDateFormat("ddMMyyyy_HH:mm:ss").format(new Date())
                 );
 
                 UploadTask uploadTask;
@@ -320,8 +371,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
                     //Fixing rotated images
-                    int imageRotation = getImageRotation(new File(currentPhotoPath));
-                    Log.d("imgRotation", imageRotation+"");
+                    int imageRotation = getImageRotation(new File(imagesFilePath.get(file)));
+                    //Log.d("imgRotation", imageRotation+"");
+                    Log.d("Uploading", "currPhotoPath: "+imagesFilePath.get(file)+" file-uri: "+file.toString());
                     if (imageRotation != 0) {
                         //bmp = getBitmapRotatedByDegree(bmp, imageRotation);
                         Matrix matrix = new Matrix();
@@ -329,7 +381,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                         bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
                     }
 
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 90, baos);
                     byte[] data = baos.toByteArray();
 
                     uploadTask = imagesRef.putBytes(data);
@@ -351,11 +403,11 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                         Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-                        while (!uriTask.isComplete()) ;
+                        while (!uriTask.isComplete());
                         Uri downloadUri = uriTask.getResult();
                         imagesUrl.add(downloadUri.toString());
-                        //toaster.shortToast("Upload success: " + file.getLastPathSegment(), formActivity.this);
                         mProgressTV.setText("Upload success: " + file.getLastPathSegment());
+                        Log.d("onSuccess", "An image just uploaded..url:"+downloadUri.toString());
                     }
                 }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -364,10 +416,12 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                         mProgressTV.setText("Uploading " + file.getLastPathSegment() + ": " + (int) progress + "%");
                     }
                 });
+
             }//try block
             catch (Exception e){e.printStackTrace();}
         }//for loop
 
+        //Task downTasks = Tasks.whenAll(downloadUrlTasks);
         Task allTasks = Tasks.whenAll(uploadTasks);
         allTasks.addOnSuccessListener(new OnSuccessListener() {
             @Override
@@ -387,7 +441,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     //Handling the rotation of the image
-    private static int getImageRotation(
+    public static int getImageRotation(
             final File imageFile
     ) {
 
@@ -407,7 +461,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             return exifToDegrees(exifRotation);
     }
 
-    private static int exifToDegrees(int rotation) {
+    public static int exifToDegrees(int rotation) {
         if (rotation == ExifInterface.ORIENTATION_ROTATE_90)
             return 90;
         else if (rotation == ExifInterface.ORIENTATION_ROTATE_180)
@@ -459,7 +513,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 if (imageRotation != 0)
                     bmp = getBitmapRotatedByDegree(bmp, imageRotation);
                 FileOutputStream fos = new FileOutputStream(currentPhotoPath);
-                bmp.compress(Bitmap.CompressFormat.JPEG, 70, fos);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 90, fos);
                 fos.close();
                 }catch (Exception e){e.printStackTrace();}
                 //also store the intent type (gallery/image) of each image to a map
@@ -660,6 +714,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             int nh = (int) (bitmapImage.getHeight() * (512.0 / bitmapImage.getWidth()));
             Bitmap scaled = Bitmap.createScaledBitmap(bitmapImage, 512, nh, true);
 
+            //fixing rotated (gallery) images
+            int imageRotation = getImageRotation(new File(currentPhotoPath));
+            if (imageRotation != 0) {
+                Matrix matrix = new Matrix();
+                matrix.preRotate(90);
+                scaled = Bitmap.createBitmap(scaled, 0, 0, scaled.getWidth(), scaled.getHeight(), matrix, true);
+            }
+
             ImageView tempImg = new ImageView(this);
             tempImg.setImageBitmap(scaled);
             long time = new Date().getTime();
@@ -668,17 +730,16 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     mWidth,
                     LinearLayout.LayoutParams.MATCH_PARENT);
-            lp.setMarginStart(10);
+            lp.setMarginStart(15);
             tempImg.setLayoutParams(lp);
             tempImg.setTag("IMG_" + time);
             imgLL.addView(tempImg);
 
             //Displaying message on how to remove a selected image
-            if (images.isEmpty()){
+            if (images.isEmpty()) {
                 final Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
-                        "To remove selected images, long-press on them", Snackbar.LENGTH_INDEFINITE);
-                snackbar
-                .setAction("Dismiss", new View.OnClickListener() {
+                        "To remove selected images, please long-press on them", Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("Dismiss", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         snackbar.dismiss();
@@ -686,6 +747,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 })
                 .show();
             }
+
             images.put("IMG_" + time, mImageUri);
             tempImg.setOnLongClickListener(this);
             tempImg.setOnClickListener(this);
@@ -693,8 +755,19 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             //also storing the filepath of each image to a map
             imagesFilePath.put(mImageUri, currentPhotoPath);
 
+            //changing the 'set image' to 'add image' and vice-versa and also snackBar display
+            handleSetImgIcon();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void handleSetImgIcon(){
+        if (images.isEmpty()){
+            setImgIconTV.setText("Set Image");
+        }
+        else {
+            setImgIconTV.setText("Add Image");
         }
     }
 
@@ -735,6 +808,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         Log.d("onClick", "thisImageUri:"+thisImageUri.toString());
         Intent intent = new Intent(this, imgActivity.class);
         intent.putExtra("ImageUri", thisImageUri);
+        intent.putExtra("CurrentPhotoPath", imagesFilePath.get(thisImageUri));
         startActivity(intent);
     }
 
@@ -747,9 +821,10 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         String key = (String) imageView.getTag();
         images.remove(key);
         imgLL.removeView(v);
+
+        handleSetImgIcon();
         return true;
     }
-
 
     /*
     *
