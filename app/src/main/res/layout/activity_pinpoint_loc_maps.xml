@@ -18,11 +18,12 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/markerImageView"
+            android:id="@+id/pinIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
             android:src="@drawable/ic_location_pin_32dp"
+            android:visibility="gone"
             map:layout_constraintBottom_toBottomOf="@+id/linearLayout"
             map:layout_constraintEnd_toEndOf="parent"
             map:layout_constraintStart_toStartOf="parent"
@@ -100,6 +101,26 @@
             </LinearLayout>
 
         </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <RelativeLayout
+        android:id="@+id/grayRL"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B0131212">
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/pinpointMapPB"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
 </FrameLayout>

@@ -25,9 +25,13 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -66,6 +70,7 @@ import com.google.android.gms.tasks.Task;
 import java.util.List;
 import java.util.Locale;
 
+import static android.view.View.GONE;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 public class pinpointLocMapsActivity extends FragmentActivity implements
@@ -73,7 +78,9 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         //,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
     private GoogleMap mMap;
-    EditText locationET; Button confirmLocationButton; ImageButton gpsButton;
+    EditText locationET; Button confirmLocationButton;
+    ImageButton gpsButton; ImageView pinIV;
+    ProgressBar pinpointMapPB; RelativeLayout grayRL;
 
     //create this at top of onCreate
     //first try
@@ -82,6 +89,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
     LocationRequest mLocationRequest;
     Location gpsLoc, markerLoc;
     Boolean allowLocUpdt = true, tooZoomedOut = false, userHandledFirstGpsPrompt=false;
+    Boolean isLocLoadFinished = false;
     Geocoder geocoder;
     List<Address> addresses;
 
@@ -90,6 +98,13 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pinpoint_loc_maps);
 
+        //disabling touch input until location is loaded
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        pinpointMapPB = findViewById(R.id.pinpointMapPB);
+        grayRL = findViewById(R.id.grayRL);
+        pinIV = findViewById(R.id.pinIV);
         locationET = findViewById(R.id.locationET);
         locationET.setFocusableInTouchMode(false);
         locationET.clearFocus();
@@ -176,8 +191,8 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
             }
         });*/
 
-        toaster.longToast("Please drag map to set location",
-                pinpointLocMapsActivity.this);
+        //toaster.longToast("Please drag map to set location",
+                //pinpointLocMapsActivity.this);
 
         //Map cameraMovedListener
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
@@ -283,6 +298,9 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                                     //locationET.setText(location.getLatitude()+", "+location.getLongitude());
                                     //toast("loc_update");
                                     moveToGPSLocation();
+                                    //hiding the progressBar upon gps location update
+                                    //..should move this into the moveToGPSLoc() method later
+                                    handleLocLoadFinished();
                                 }
 
                             }
@@ -346,7 +364,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                                     toast("Last known location ");
                                     gpsLoc = location;
                                     moveToGPSLocation();
-
+                                    handleLocLoadFinished();
                                 } else { //No last location available
                                     toast("Custom location");
                                     LatLng shaplaChottorLatLng = new LatLng(23.726623, 90.421576);
@@ -363,6 +381,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                                             , markerLoc.getLongitude()), 6.5f));
 
                                     tooZoomedOut = true;
+                                    handleLocLoadFinished();
                                 }
                                 userHandledFirstGpsPrompt = true;
                             }
@@ -397,6 +416,18 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 }
             }
             allowLocUpdt = false;
+        }
+    }
+
+    private void handleLocLoadFinished(){
+        if (!isLocLoadFinished) {
+            pinpointMapPB.setVisibility(View.GONE);
+            grayRL.setVisibility(GONE);
+            pinIV.setVisibility(View.VISIBLE);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            toaster.longToast("Please drag map to set location",
+                    pinpointLocMapsActivity.this);
+            isLocLoadFinished = true;
         }
     }
 
