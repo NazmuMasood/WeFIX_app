@@ -53,7 +53,10 @@
                 android:id="@+id/showReportButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="see report" />
+                android:layout_marginTop="5dp"
+                android:background="@drawable/rounded_corner_button"
+                android:text="see report"
+                android:textColor="@color/colorWhite" />
         </LinearLayout>
 
         <Button
@@ -62,7 +65,9 @@
             android:layout_height="40dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="4dp"
+            android:background="@drawable/rounded_corner_button"
             android:text="CONFIRM"
+            android:textColor="@color/colorWhite"
             android:textSize="12sp"
             map:layout_constraintBottom_toBottomOf="parent"
             map:layout_constraintEnd_toStartOf="@+id/pollutedLocSearchTypeButton"
@@ -75,8 +80,10 @@
             android:layout_height="40dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="6dp"
+            android:background="@drawable/rounded_corner_button"
             android:gravity="center|center_horizontal|center_vertical"
             android:text="CUSTOM"
+            android:textColor="@color/colorWhite"
             android:textSize="12sp"
             map:layout_constraintBottom_toBottomOf="parent"
             map:layout_constraintEnd_toEndOf="parent"
@@ -88,7 +95,7 @@
             android:layout_width="222dp"
             android:layout_height="60dp"
             android:layout_marginBottom="30dp"
-            android:background="#306962"
+            android:background="@drawable/rounded_corner_button"
             android:text="@string/report_pollution"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
