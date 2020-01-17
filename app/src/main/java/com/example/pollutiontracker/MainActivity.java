@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateReportStatTV(){
-        String reportStat = "----- Report Stats -----";
+        String reportStat = "Place: ALL";//----- Report Stats -----
         for (LinkedHashMap.Entry<String, String> entry : reportStatMap.entrySet()){
             if (entry.getKey().equals("Sources") && !sourceHashSet.isEmpty()){
                 reportStat = reportStat + "\n" + entry.getKey() + ": " + sources;
@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void prepareReportStatHashMap() {
-        reportStatMap.put("Place", "ALL");
+        //reportStatMap.put("Place", "ALL");
         /*reportStatMap.put("Location", 23.726623+", "+ 90.421576);
         reportStatMap.put("Total population", "NA");
         reportStatMap.put("Population level", "NA");
