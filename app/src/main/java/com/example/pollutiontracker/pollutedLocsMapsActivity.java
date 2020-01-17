@@ -1,6 +1,7 @@
 package com.example.pollutiontracker;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -57,6 +58,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         implements OnMapReadyCallback
 {
 
+    private static final int TAG_CODE_PERMISSION_LOCATION = 10000;
     private GoogleMap mMap;
     DatabaseReference ref; GeoFire geoFire;
     Button reportButton, pollutedLocSearchTypeButton, pollutedLocCustomConfirmButton, showReportButton;
@@ -166,8 +168,21 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         reportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(pollutedLocsMapsActivity.this, pinpointLocMapsActivity.class);
-                startActivity(intent);
+                if (ContextCompat.checkSelfPermission(pollutedLocsMapsActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(pollutedLocsMapsActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                                PackageManager.PERMISSION_GRANTED) {
+                    //mMap.setMyLocationEnabled(true);
+                    //mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                    Intent intent = new Intent(pollutedLocsMapsActivity.this, pinpointLocMapsActivity.class);
+                    startActivity(intent);
+                } else {
+                    //Toast.makeText(pollutedLocsMapsActivity.this, "No gps permission", Toast.LENGTH_LONG).show();
+                    ActivityCompat.requestPermissions(pollutedLocsMapsActivity.this, new String[] {
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION },
+                            TAG_CODE_PERMISSION_LOCATION);
+                }
             }
         });
 
@@ -213,6 +228,20 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                 }
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == TAG_CODE_PERMISSION_LOCATION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location permission granted", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(pollutedLocsMapsActivity.this, pinpointLocMapsActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void addEventListenerToGeoQuery(GeoQuery geoQuery) {

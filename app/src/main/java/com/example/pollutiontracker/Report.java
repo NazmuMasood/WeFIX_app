@@ -8,24 +8,27 @@ public class Report {
     public String postedAt;
     public String address;
     public String category, source, extent;
+    //public String subCategory;
     public ArrayList<String> imagesUrl;
 
     public Report(){}
 
-    public Report(mLatLng location, String postedAt, String address, String category, String source, String extent) {
+    public Report(mLatLng location, String postedAt, String address, String category, /*String subCategory,*/ String source, String extent) {
         this.location = location;
         this.postedAt = postedAt;
         this.address = address;
         this.category = category;
+        //this.subCategory = subCategory;
         this.source = source;
         this.extent = extent;
     }
 
-    public Report(mLatLng location, String postedAt, String address, String category, String source, String extent, ArrayList<String> imagesUrl) {
+    public Report(mLatLng location, String postedAt, String address, String category, /*String subCategory,*/ String source, String extent, ArrayList<String> imagesUrl) {
         this.location = location;
         this.postedAt = postedAt;
         this.address = address;
         this.category = category;
+        //this.subCategory = subCategory;
         this.source = source;
         this.extent = extent;
         this.imagesUrl = imagesUrl;
@@ -46,6 +49,10 @@ public class Report {
     public String getCategory() {
         return category;
     }
+
+    /*public String getSubCategory() {
+        return subCategory;
+    }*/
 
     public String getSource() {
         return source;

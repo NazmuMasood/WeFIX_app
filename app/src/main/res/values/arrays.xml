@@ -3,11 +3,47 @@
     <string-array name="category_array">
         <item>Air</item>
         <item>Water</item>
-        <item>Noise</item>
+        <item>Sound</item>
         <item>Land</item>
         <item>Others</item>
     </string-array>
-    
+
+    <string-array name="air_array">
+        <item>Smoke</item>
+        <item>Dust</item>
+        <item>Smog</item>
+        <item>Bad smell</item>
+        <item>Exposed Waste</item>
+        <item>Open drainage</item>
+        <item>Drainage overflow</item>
+    </string-array>
+
+    <string-array name="water_array">
+        <item>Waste dumping</item>
+        <item>Chemical dumping</item>
+        <item>Contamination</item>
+        <item>Plastic contamination</item>
+    </string-array>
+
+    <string-array name="sound_array">
+        <item>Vehicle</item>
+        <item>Factory</item>
+        <item>Construction</item>
+        <item>Over crowd</item>
+        <item>Loud speakers/mike</item>
+    </string-array>
+
+    <string-array name="land_array">
+        <item>Waste dumping</item>
+        <item>Illegal grabbing</item>
+        <item>Chemical dumping</item>
+        <item>Illegal construction</item>
+    </string-array>
+
+    <string-array name="other_array">
+        <item>Others</item>
+    </string-array>
+
     <string-array name="source_array">
         <item>Household</item>
         <item>Industry</item>

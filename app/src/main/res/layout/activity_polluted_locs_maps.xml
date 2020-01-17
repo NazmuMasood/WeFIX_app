@@ -90,19 +90,75 @@
             map:layout_constraintTop_toTopOf="parent"
             map:layout_constraintVertical_bias="0.0" />
 
-        <Button
-            android:id="@+id/reportButton"
-            android:layout_width="222dp"
-            android:layout_height="60dp"
-            android:layout_marginBottom="30dp"
-            android:background="@drawable/rounded_corner_button"
-            android:text="@string/report_pollution"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textSize="22sp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             map:layout_constraintBottom_toTopOf="@+id/listLinearLayout"
             map:layout_constraintEnd_toEndOf="parent"
-            map:layout_constraintStart_toStartOf="parent" />
+            map:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                map:layout_constraintBottom_toBottomOf="parent"
+                map:layout_constraintEnd_toEndOf="parent"
+                map:layout_constraintStart_toStartOf="parent"
+                map:layout_constraintTop_toTopOf="parent">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/button5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Button" />
+
+                        <Button
+                            android:id="@+id/button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Button" />
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/reportButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/rounded_corner_button"
+                            android:padding="15dp"
+                            android:text="@string/report_pollution"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="22sp" />
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
             android:id="@+id/listLinearLayout"

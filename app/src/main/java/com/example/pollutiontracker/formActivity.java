@@ -87,8 +87,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     Boolean allFieldsSatisfy = true; LinearLayout formParentLL; String deviceModel = GetDeviceInfo.getDeviceName();
 
     EditText locationET;
-    Spinner categorySpinner, sourceSpinner, extentSpinner;
-    String[] categories, sources, extents;
+    Spinner categorySpinner, sourceSpinner, extentSpinner; Spinner subCategorySpinner;
+    String[] categories, sources, extents; String[] subCategories;
+    ArrayAdapter<String> adapter2;
     Button submitButton;
 
     //Image related
@@ -168,8 +169,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         categorySpinner.setAdapter(adapter1);
         categorySpinner.setOnItemSelectedListener(this);
 
-        sources = getResources().getStringArray(R.array.source_array);
-        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(this,
+        sources = getResources().getStringArray(R.array.air_array);
+        adapter2 = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, sources);
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sourceSpinner.setAdapter(adapter2);
@@ -834,7 +835,23 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         switch (parent.getId()){
             case R.id.categorySpinner:
-                //toaster.shortToast("You selected category "+categories[position], formActivity.this);
+                //toaster.shortToast("You selected category "+categories[position]+" "+position, formActivity.this);
+                switch (position) {
+                    case 0:
+                        sources = getResources().getStringArray(R.array.air_array); break;
+                    case 1:
+                        sources = getResources().getStringArray(R.array.water_array); break;
+                    case 2:
+                        sources = getResources().getStringArray(R.array.sound_array); break;
+                    case 3:
+                        sources = getResources().getStringArray(R.array.land_array); break;
+                    case 4:
+                        sources = getResources().getStringArray(R.array.other_array); break;
+                }
+                adapter2 = new ArrayAdapter<>(this,
+                        android.R.layout.simple_spinner_item, sources);
+                adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                sourceSpinner.setAdapter(adapter2);
                 break;
             case R.id.sourceSpinner:
                 //toaster.shortToast("You selected source "+sources[position], formActivity.this);

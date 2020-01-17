@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                     //swipeLayout.setRefreshing(false);
                     setGraph();
                 }
-            }, 3000);
+            }, 5000);
             //swipeLayout.setRefreshing(false);
         }
         else {
