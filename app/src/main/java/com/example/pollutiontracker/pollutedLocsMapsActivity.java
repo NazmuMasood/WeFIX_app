@@ -48,11 +48,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.internal.InternalTokenProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class pollutedLocsMapsActivity extends FragmentActivity
         implements OnMapReadyCallback
@@ -67,6 +72,13 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     int pollutedLocSearchType = 0;
     Location markerLoc; Geocoder geocoder; List<Address> addresses;
     Boolean tooZoomedOut = false;
+    Button graphButton, summaryButton;
+
+    //Addition
+    ArrayList<Report> reports;String sources = ""; int flagCount = 0;
+    LinkedHashMap<String, String> reportStatMap; Set<String> sourceHashSet;
+    HashMap<String, Integer> eachCategoryFlagCount;
+    HashMap<String, HashMap<String, Integer>> eachCategoryInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +105,38 @@ public class pollutedLocsMapsActivity extends FragmentActivity
 
         pollutedLocMarkerIV = findViewById(R.id.pollutedLocMarkerIV);
         pollutedLocMarkerIV.setVisibility(View.GONE);
+
+        graphButton = findViewById(R.id.graphButton);
+        graphButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), popupGraph.class);
+                intent.putExtra("EachCategoryFlagCount", eachCategoryFlagCount);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        });
+        summaryButton = findViewById(R.id.summaryButton);
+        summaryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), popupGraph.class);
+                intent.putExtra("Summary", reportStat);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        });
+
+        //Addition
+        reports = new ArrayList<>();
+        reportStatMap = new LinkedHashMap<>();
+        sourceHashSet = new HashSet<>();
+        eachCategoryFlagCount = new HashMap<>();
+        prepareEachCategoryFlagCountHashMap();
+        prepareReportStatHashMap();
+        updateReportStatTV();
     }
 
     @Override
@@ -162,6 +206,15 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                     pollutedLocCustomSearchET.setVisibility(View.GONE);
                     pollutedLocMarkerIV.setVisibility(View.GONE);
                     getPollutedLocations();
+
+                    flagCount = 0;
+                    reports = new ArrayList<>();
+                    reportStatMap = new LinkedHashMap<>();
+                    sourceHashSet = new HashSet<>();
+                    eachCategoryFlagCount = new HashMap<>();
+                    prepareEachCategoryFlagCountHashMap();
+                    prepareReportStatHashMap();
+                    updateReportStatTV();
                 }
             }
         });
@@ -228,6 +281,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                 }
             }
         });
+
     }
 
     @Override
@@ -263,7 +317,6 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                                 .title(report.address)
                                 .icon(getMarkerIcon(report.category))
                         );
-
                     }
 
                     @Override
@@ -312,6 +365,21 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                             .title(report.address)
                             .icon(getMarkerIcon(report.category))
                     );
+
+                    //Addition
+                    reports.add(report);
+                    //Updating the reports stat textview
+                    if (!sourceHashSet.contains(report.source)){
+                        sourceHashSet.add(report.source);
+                        updateSourcesKeyValue();
+                        updateReportStatHashMap("Sources", sources);
+                    }
+                    if (eachCategoryFlagCount.get(report.category)!=null) {
+                        eachCategoryFlagCount.put(report.category, eachCategoryFlagCount.get(report.category) + 1);
+                    }
+                    flagCount++; System.out.println("myFlagCount "+flagCount);
+                    updateReportStatHashMap("No. of flags", Integer.toString(flagCount));
+                    updateReportStatTV();
                 }
                 toaster.shortToast( "Found "+dataSnapshot.getChildrenCount()+" different polluted locations",
                         pollutedLocsMapsActivity.this);
@@ -389,5 +457,55 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         }
         catch (Exception e){e.printStackTrace();}
         return null;
+    }
+
+    //Addition
+    private void updateReportStatHashMap(String statTypeKey, String value){
+        reportStatMap.put(statTypeKey, value);
+    }
+
+    private void prepareReportStatHashMap() {
+        reportStatMap.put("Place", "Bangladesh");
+        reportStatMap.put("Location", "Whole Country");
+        //reportStatMap.put("Category", "NA");
+        reportStatMap.put("Sources", "NA");
+        reportStatMap.put("No. of flags", "NA");
+    }
+
+    private void prepareEachCategoryFlagCountHashMap() {
+        String[] categories = getResources().getStringArray(R.array.category_array);
+        for (String category : categories){
+            eachCategoryFlagCount.put(category, 0);
+        }
+    }
+
+    private void updateSourcesKeyValue(){
+        sources = "";
+        boolean firstItem = true;
+        for (String s : sourceHashSet){
+            if (firstItem){
+                sources = sources + s;
+                firstItem = false;
+            } else {
+                sources = sources + ", "+ s;
+            }
+        }
+    }
+
+    String reportStat;
+    private void updateReportStatTV(){
+        reportStat = "----- Report Stats -----";
+        for (LinkedHashMap.Entry<String, String> entry : reportStatMap.entrySet()){
+            if (entry.getKey().equals("Sources") && !sourceHashSet.isEmpty()){
+                reportStat = reportStat + "\n" + entry.getKey() + ": " + sources;
+            }
+            else if (entry.getKey().equals("No. of flags")){
+                reportStat = reportStat + "\n" + entry.getKey() + ": " + flagCount;
+            }
+            else {
+                reportStat = reportStat + "\n" + entry.getKey() + ": " + entry.getValue();
+            }
+        }
+        //reportStatTV.setText(reportStat);
     }
 }
