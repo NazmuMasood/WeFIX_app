@@ -75,10 +75,16 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     Button graphButton, summaryButton;
 
     //Addition
-    ArrayList<Report> reports;String sources = ""; int flagCount = 0;
-    LinkedHashMap<String, String> reportStatMap; Set<String> sourceHashSet;
+    ArrayList<Report> reports;
+    int flagCount = 0;
+    String sources = "";
+    Set<String> sourceHashSet;
+    String reportStat;
+    LinkedHashMap<String, String> reportStatMap;
     HashMap<String, Integer> eachCategoryFlagCount;
-    HashMap<String, HashMap<String, Integer>> eachCategoryInfo;
+    String categories = "";
+    Set<String> categoriesHashSet;
+    //HashMap<String, HashMap<String, Integer>> eachCategoryInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,6 +139,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         reports = new ArrayList<>();
         reportStatMap = new LinkedHashMap<>();
         sourceHashSet = new HashSet<>();
+        categoriesHashSet = new HashSet<>();
         eachCategoryFlagCount = new HashMap<>();
         prepareEachCategoryFlagCountHashMap();
         prepareReportStatHashMap();
@@ -205,16 +212,20 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                     showReportButton.setVisibility(View.GONE);
                     pollutedLocCustomSearchET.setVisibility(View.GONE);
                     pollutedLocMarkerIV.setVisibility(View.GONE);
-                    getPollutedLocations();
 
+                    //Resetting all variables
                     flagCount = 0;
                     reports = new ArrayList<>();
                     reportStatMap = new LinkedHashMap<>();
                     sourceHashSet = new HashSet<>();
+                    categoriesHashSet = new HashSet<>();
                     eachCategoryFlagCount = new HashMap<>();
                     prepareEachCategoryFlagCountHashMap();
                     prepareReportStatHashMap();
                     updateReportStatTV();
+
+                    //Again retrieving all locations
+                    getPollutedLocations();
                 }
             }
         });
@@ -374,6 +385,11 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                         updateSourcesKeyValue();
                         updateReportStatHashMap("Sources", sources);
                     }
+                    if (!categoriesHashSet.contains(report.category)){
+                        categoriesHashSet.add(report.category);
+                        updateCategoriesKeyValue();
+                        updateReportStatHashMap("Categories", categories);
+                    }
                     if (eachCategoryFlagCount.get(report.category)!=null) {
                         eachCategoryFlagCount.put(report.category, eachCategoryFlagCount.get(report.category) + 1);
                     }
@@ -393,19 +409,20 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     }
 
     private BitmapDescriptor getMarkerIcon(String category){
-        if (category.equals("Air")) {
+        String[] categories = getResources().getStringArray(R.array.category_array);
+        if (category.equals(categories[0])) {
            return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_air_32dp);
         }
-        else if (category.equals("Water")) {
+        else if (category.equals(categories[1])) {
             return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_water_32dp);
         }
-        else if (category.equals("Noise")) {
+        else if (category.equals(categories[2])) {
             return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_noise_32dp);
         }
-        else if (category.equals("Land")) {
+        else if (category.equals(categories[3])) {
             return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_land_32dp);
         }
-        else if (category.equals("Others")) {
+        else if (category.equals(categories[4])) {
             return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_others_32dp);
         }
         return bitmapDescriptorFromVector(pollutedLocsMapsActivity.this, R.drawable.ic_marker_others_32dp);
@@ -467,7 +484,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     private void prepareReportStatHashMap() {
         reportStatMap.put("Place", "Bangladesh");
         reportStatMap.put("Location", "Whole Country");
-        //reportStatMap.put("Category", "NA");
+        reportStatMap.put("Categories", "NA");
         reportStatMap.put("Sources", "NA");
         reportStatMap.put("No. of flags", "NA");
     }
@@ -492,18 +509,33 @@ public class pollutedLocsMapsActivity extends FragmentActivity
         }
     }
 
-    String reportStat;
+    private void updateCategoriesKeyValue(){
+        categories = "";
+        boolean firstItem = true;
+        for (String s : categoriesHashSet){
+            if (firstItem){
+                categories = categories + s;
+                firstItem = false;
+            } else {
+                categories = categories + ", "+ s;
+            }
+        }
+    }
+
     private void updateReportStatTV(){
         reportStat = "----- Report Stats -----";
         for (LinkedHashMap.Entry<String, String> entry : reportStatMap.entrySet()){
             if (entry.getKey().equals("Sources") && !sourceHashSet.isEmpty()){
-                reportStat = reportStat + "\n" + entry.getKey() + ": " + sources;
+                reportStat = reportStat + "\n\n" + entry.getKey() + ": " + sources;
+            }
+            else if (entry.getKey().equals("Categories") && !categoriesHashSet.isEmpty()){
+                reportStat = reportStat + "\n\n" + entry.getKey() + ": " + categories;
             }
             else if (entry.getKey().equals("No. of flags")){
-                reportStat = reportStat + "\n" + entry.getKey() + ": " + flagCount;
+                reportStat = reportStat + "\n\n" + entry.getKey() + ": " + flagCount;
             }
             else {
-                reportStat = reportStat + "\n" + entry.getKey() + ": " + entry.getValue();
+                reportStat = reportStat + "\n\n" + entry.getKey() + ": " + entry.getValue();
             }
         }
         //reportStatTV.setText(reportStat);

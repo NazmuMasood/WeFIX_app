@@ -5,7 +5,7 @@
     <!--Pollution types-->
     <string name="pollution_type_air">Air</string>
     <string name="pollution_type_water">Water</string>
-    <string name="pollution_type_noise">Noise</string>
+    <string name="pollution_type_sound">Sound</string>
     <string name="pollution_type_land">Land</string>
     <string name="pollution_type_others">Others</string>
     <!--Report pollution button -->

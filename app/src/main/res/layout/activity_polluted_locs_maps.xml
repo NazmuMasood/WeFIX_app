@@ -265,7 +265,7 @@
                 android:gravity="start|center_vertical"
                 android:paddingStart="4dp"
                 android:paddingEnd="13dp"
-                android:text="@string/pollution_type_noise" />
+                android:text="@string/pollution_type_sound" />
 
             <ImageView
                 android:id="@+id/imageViewLand"
