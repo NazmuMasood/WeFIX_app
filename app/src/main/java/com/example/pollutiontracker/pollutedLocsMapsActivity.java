@@ -60,7 +60,8 @@ import java.util.Locale;
 import java.util.Set;
 
 public class pollutedLocsMapsActivity extends FragmentActivity
-        implements OnMapReadyCallback
+        implements OnMapReadyCallback,
+        GoogleMap.OnMarkerClickListener
 {
 
     private static final int TAG_CODE_PERMISSION_LOCATION = 10000;
@@ -149,6 +150,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMarkerClickListener(this);
 
         ref = FirebaseDatabase.getInstance().getReference("pollution-tracker/reports");
         final DatabaseReference geoFireRef = FirebaseDatabase.getInstance().getReference("pollution-tracker/geofire");
@@ -371,11 +373,12 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Report report = snapshot.getValue(Report.class);
                     Log.d("onDataChangeFireB", "report: location= "+report.location.latitude+", "+report.location.longitude);
-                    mMap.addMarker(new MarkerOptions()
+                    Marker marker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(report.location.latitude, report.location.longitude))
                             .title(report.address)
                             .icon(getMarkerIcon(report.category))
                     );
+                    marker.setTag(report);
 
                     //Addition
                     reports.add(report);
@@ -406,6 +409,17 @@ public class pollutedLocsMapsActivity extends FragmentActivity
                 System.out.println("The read failed: " + databaseError.getCode());
             }
         });
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        Report report = (Report) marker.getTag();
+        Intent intent = new Intent(getApplicationContext(), popupSingleReport.class);
+        intent.putExtra("Report", report);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        return true;
     }
 
     private BitmapDescriptor getMarkerIcon(String category){
@@ -482,7 +496,7 @@ public class pollutedLocsMapsActivity extends FragmentActivity
     }
 
     private void prepareReportStatHashMap() {
-        reportStatMap.put("Place", "Bangladesh");
+        reportStatMap.put("Address", "Bangladesh");
         reportStatMap.put("Location", "Whole Country");
         reportStatMap.put("Categories", "NA");
         reportStatMap.put("Sources", "NA");

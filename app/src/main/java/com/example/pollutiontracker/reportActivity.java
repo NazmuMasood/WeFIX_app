@@ -35,7 +35,8 @@ public class reportActivity extends AppCompatActivity {
     GeoFire geoFire; DatabaseReference ref; Location markerLoc; String place;
     ArrayList<Report> reports;
     ArrayList<String> images; ArrayList<String> imgDescriptions;
-    TextView reportStatTV; SliderView sliderView; SliderAdapterExample adapter;
+    TextView reportStatTV;
+    SliderView sliderView; SliderAdapterExample adapter;
     String sources = ""; int flagCount = 0;
     LinkedHashMap<String, String> reportStatMap; Set<String> sourceHashSet;
     HashMap<String, Integer> eachCategoryFlagCount;

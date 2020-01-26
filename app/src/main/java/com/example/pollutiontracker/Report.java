@@ -1,37 +1,68 @@
 package com.example.pollutiontracker;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class Report {
+public class Report implements Serializable {
     public mLatLng location;
     public String postedAt;
     public String address;
     public String category, source, extent;
-    //public String subCategory;
     public ArrayList<String> imagesUrl;
+    public ArrayList<String> audiosUrl;
 
     public Report(){}
 
-    public Report(mLatLng location, String postedAt, String address, String category, /*String subCategory,*/ String source, String extent) {
+    //Constructor for reports having no image and no audio content
+    public Report(mLatLng location, String postedAt, String address,
+                  String category, String source, String extent) {
         this.location = location;
         this.postedAt = postedAt;
         this.address = address;
         this.category = category;
-        //this.subCategory = subCategory;
         this.source = source;
         this.extent = extent;
     }
 
-    public Report(mLatLng location, String postedAt, String address, String category, /*String subCategory,*/ String source, String extent, ArrayList<String> imagesUrl) {
+    //Constructor for reports having image contents but no audio content
+    public Report(mLatLng location, String postedAt, String address,
+                  String category, String source, String extent,
+                  ArrayList<String> imagesUrl) {
         this.location = location;
         this.postedAt = postedAt;
         this.address = address;
         this.category = category;
-        //this.subCategory = subCategory;
         this.source = source;
         this.extent = extent;
         this.imagesUrl = imagesUrl;
+    }
+
+    //Constructor for reports having audio contents but no image content
+    public Report( ArrayList<String> audiosUrl,
+                   mLatLng location, String postedAt, String address,
+                   String category, String source, String extent ) {
+        this.location = location;
+        this.postedAt = postedAt;
+        this.address = address;
+        this.category = category;
+        this.source = source;
+        this.extent = extent;
+        this.audiosUrl = audiosUrl;
+    }
+
+    //Constructor for reports having both image and audio contents
+    public Report(mLatLng location, String postedAt, String address,
+                  String category, String source, String extent,
+                  ArrayList<String> imagesUrl,  ArrayList<String> audiosUrl ) {
+        this.location = location;
+        this.postedAt = postedAt;
+        this.address = address;
+        this.category = category;
+        this.source = source;
+        this.extent = extent;
+        this.imagesUrl = imagesUrl;
+        this.audiosUrl = audiosUrl;
     }
 
     public mLatLng getLocation() {
@@ -49,10 +80,6 @@ public class Report {
     public String getCategory() {
         return category;
     }
-
-    /*public String getSubCategory() {
-        return subCategory;
-    }*/
 
     public String getSource() {
         return source;

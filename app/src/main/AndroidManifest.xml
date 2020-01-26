@@ -21,9 +21,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".popupGraph"
+        <activity android:name=".popupSingleReport"
             android:noHistory="true"
-            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar"></activity>
+            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar"/>
+        <activity
+            android:name=".popupGraph"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar" />
         <activity android:name=".graphActivity" />
         <activity android:name=".reportActivity" />
         <activity
@@ -57,7 +61,7 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

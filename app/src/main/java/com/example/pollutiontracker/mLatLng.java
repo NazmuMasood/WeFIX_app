@@ -1,6 +1,8 @@
 package com.example.pollutiontracker;
 
-public class mLatLng {
+import java.io.Serializable;
+
+public class mLatLng implements Serializable {
     public double latitude;
     public double longitude;
 

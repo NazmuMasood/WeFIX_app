@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".popupSingleReport">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="1dp">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/textView9"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="Report"
+                                android:textStyle="bold|italic" />
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/popupSummaryRL"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/popupSummaryTV"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=" -- Report Stats --" />
+                        </RelativeLayout>
+
+                        <View
+                            android:id="@+id/divider6"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="?android:attr/listDivider"
+                            android:layout_margin="5dp"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp"/>
+
+                        <RelativeLayout
+                            android:id="@+id/popupImagesRL"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <FrameLayout
+                                android:id="@+id/popupImageSliderFL"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent">
+
+                                <com.smarteist.autoimageslider.SliderView
+                                    android:id="@+id/popupImageSlider"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="300dp"
+                                    app:sliderAnimationDuration="600"
+                                    app:sliderAutoCycleDirection="back_and_forth"
+                                    app:sliderAutoCycleEnabled="true"
+                                    app:sliderCircularHandlerEnabled="true"
+                                    app:sliderIndicatorAnimationDuration="600"
+                                    app:sliderIndicatorGravity="center_horizontal|bottom"
+                                    app:sliderIndicatorMargin="15dp"
+                                    app:sliderIndicatorOrientation="horizontal"
+                                    app:sliderIndicatorPadding="3dp"
+                                    app:sliderIndicatorRadius="2dp"
+                                    app:sliderIndicatorSelectedColor="#FFF"
+                                    app:sliderIndicatorUnselectedColor="#5A5A5A"
+                                    app:sliderScrollTimeInSec="3"
+                                    app:sliderStartAutoCycle="true">
+
+                                </com.smarteist.autoimageslider.SliderView>
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/noImgMessageTV"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="No image available" />
+                        </RelativeLayout>
+
+                        <View
+                            android:id="@+id/audioSectionDivider"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="?android:attr/listDivider"
+                            android:layout_margin="5dp"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp"/>
+
+                        <RelativeLayout
+                            android:id="@+id/popupAudioRL"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <FrameLayout
+                                android:id="@+id/popupAudioFL"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_centerInParent="true">
+
+                                <ImageButton
+                                    android:id="@+id/popupAudioIB"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    app:srcCompat="@android:drawable/ic_media_play" />
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/noAudioMessageTV"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="No audio available" />
+                        </RelativeLayout>
+                    </LinearLayout>
+                </ScrollView>
+            </androidx.cardview.widget.CardView>
+
+        </FrameLayout>
+
+
+        <ImageButton
+            android:id="@+id/closePopupSingleSummaryIB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/places_ic_clear"
+            android:padding="10dp" />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
