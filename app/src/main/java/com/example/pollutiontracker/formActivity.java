@@ -3,6 +3,8 @@ package com.example.pollutiontracker;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
@@ -18,6 +20,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
+import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -45,6 +48,7 @@ import com.bumptech.glide.Glide;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -76,6 +80,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
+
+import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
+import cafe.adriel.androidaudiorecorder.model.AudioChannel;
+import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
+import cafe.adriel.androidaudiorecorder.model.AudioSource;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -116,6 +125,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
     //auth
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+    //audio chooser
+    RelativeLayout audioChooserRL, audioPlayerRL;
+    ImageButton audioChooserIB, playAudioIB, stopAudioIB, resetAudioIB, removeAudioIB;
+    final static int TAG_CODE_PERMISSION_AUDIO = 111;
+    final static int REQUEST_AUDIO_CAPTURE = 3;
+    String audioFilePath; String audiosURL;
+    MediaPlayer player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,7 +203,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         imgIB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showImgIntentPopup();
+                //showImgIntentPopup();
+                openFileChooser("camera");
             }
         });
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -199,6 +217,117 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 else { toaster.shortToast("Please fill all input fields", formActivity.this); }
             }
         });
+
+        //audio chooser
+        audioChooserRL = findViewById(R.id.audioChooserRL);
+        audioPlayerRL = findViewById(R.id.audioPlayerRL);
+        audioChooserIB = findViewById(R.id.audioChooserIB);
+        audioChooserIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(formActivity.this, android.Manifest.permission.RECORD_AUDIO) ==
+                        PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(formActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                                PackageManager.PERMISSION_GRANTED&&
+                        ContextCompat.checkSelfPermission(formActivity.this, Manifest.permission.WAKE_LOCK) ==
+                                PackageManager.PERMISSION_GRANTED) {
+                    chooseAudio();
+                } else {
+                    //Toast.makeText(pollutedLocsMapsActivity.this, "No audio permissions", Toast.LENGTH_LONG).show();
+                    ActivityCompat.requestPermissions(formActivity.this, new String[] {
+                                    Manifest.permission.RECORD_AUDIO,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    Manifest.permission.WAKE_LOCK},
+                            TAG_CODE_PERMISSION_AUDIO);
+                }
+            }
+        });
+        playAudioIB = findViewById(R.id.playAudioIB);
+        playAudioIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                playAudio();
+            }
+        });
+        stopAudioIB = findViewById(R.id.stopAudioIB);
+        stopAudioIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopAudio();
+            }
+        });
+        resetAudioIB = findViewById(R.id.resetAudioIB);
+        resetAudioIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                resetAudio();
+            }
+        });
+        removeAudioIB = findViewById(R.id.removeAudioIB);
+        removeAudioIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                removeAudio();
+            }
+        });
+    }
+
+
+
+    /*
+     *
+     * Dealing with audio
+     * */
+    private void playAudio() {
+        player = new MediaPlayer();
+        try {
+            player.setDataSource(audioFilePath);
+            player.prepare();
+            player.start();
+        } catch (IOException e) {
+            Log.e("AUDIO_PLAY_ERROR", "prepare() failed");
+        }
+    }
+
+    private void stopAudio() {
+        if (player.isPlaying()&& player!=null) {
+            player.release();
+            player = null;
+        }
+    }
+
+    private void resetAudio() {
+        stopAudio();
+        audioFilePath = null;
+        chooseAudio();
+    }
+
+    private void removeAudio() {
+        stopAudio();
+        audioChooserRL.setVisibility(View.VISIBLE);
+        audioPlayerRL.setVisibility(View.GONE);
+        audioFilePath = null;
+    }
+
+    private void chooseAudio() {
+        audioFilePath = getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/AUDIO_"
+                                    + System.currentTimeMillis() +".wav";
+        int color = ContextCompat.getColor(this, R.color.colorPrimary);
+        AndroidAudioRecorder.with(this)
+                // Required
+                .setFilePath(audioFilePath)
+                .setColor(color)
+                .setRequestCode(REQUEST_AUDIO_CAPTURE)
+
+                // Optional
+                .setSource(AudioSource.MIC)
+                .setChannel(AudioChannel.STEREO)
+                .setSampleRate(AudioSampleRate.HZ_8000)
+                .setAutoStart(true)
+                .setKeepDisplayOn(true)
+
+                // Start recording
+                .record();
     }
 
 
@@ -382,7 +511,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                         bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
                     }
 
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 90, baos);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     byte[] data = baos.toByteArray();
 
                     uploadTask = imagesRef.putBytes(data);
@@ -497,6 +626,17 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        //If audio intent..
+        if(requestCode == REQUEST_AUDIO_CAPTURE) {
+            if (resultCode == RESULT_OK) {
+                audioChooserRL.setVisibility(View.GONE);
+                audioPlayerRL.setVisibility(View.VISIBLE);
+
+            } else if (resultCode == RESULT_CANCELED) {
+                // Oops! User has canceled the recording
+            }
+        }
+
         //If image is captured via camera
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
             if (photoURI!=null) {
@@ -514,7 +654,13 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 if (imageRotation != 0)
                     bmp = getBitmapRotatedByDegree(bmp, imageRotation);
                 FileOutputStream fos = new FileOutputStream(currentPhotoPath);
+
+               /* ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                fos.write(bytes.toByteArray());*/
+
                 bmp.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+                fos.flush();
                 fos.close();
                 }catch (Exception e){e.printStackTrace();}
                 //also store the intent type (gallery/image) of each image to a map
@@ -652,6 +798,13 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 Toast.makeText(this, "Storage permission denied", Toast.LENGTH_LONG).show();
             }
         }
+        if (requestCode == TAG_CODE_PERMISSION_AUDIO) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                chooseAudio();
+            } else {
+                Toast.makeText(this, "Audio permissions denied", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void openFileChooser(String intentType) {
@@ -663,7 +816,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
                 }//if camera permission already granted
                 else {
-                    toaster.shortToast("Camera intent starting", formActivity.this);
+                    //toaster.shortToast("Camera intent starting", formActivity.this);
                     //photoURI = null; //test
                     dispatchTakePictureIntent();
                 }//else camera permission granted
@@ -842,7 +995,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     case 1:
                         sources = getResources().getStringArray(R.array.water_array); break;
                     case 2:
-                        sources = getResources().getStringArray(R.array.sound_array); break;
+                        sources = getResources().getStringArray(R.array.sound_array);break;
                     case 3:
                         sources = getResources().getStringArray(R.array.land_array); break;
                     case 4:
@@ -852,6 +1005,10 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                         android.R.layout.simple_spinner_item, sources);
                 adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 sourceSpinner.setAdapter(adapter2);
+                if (position == 2){
+                    audioChooserRL.setVisibility(View.VISIBLE);
+                }
+                else {audioChooserRL.setVisibility(View.GONE);}
                 break;
             case R.id.sourceSpinner:
                 //toaster.shortToast("You selected source "+sources[position], formActivity.this);

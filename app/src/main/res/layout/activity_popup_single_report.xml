@@ -63,10 +63,10 @@
                             android:id="@+id/divider6"
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
-                            android:background="?android:attr/listDivider"
                             android:layout_margin="5dp"
                             android:layout_marginStart="5dp"
-                            android:layout_marginEnd="5dp"/>
+                            android:layout_marginEnd="5dp"
+                            android:background="?android:attr/listDivider" />
 
                         <RelativeLayout
                             android:id="@+id/popupImagesRL"
@@ -105,17 +105,18 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
-                                android:text="No image available" />
+                                android:text="No image available"
+                                android:textStyle="italic" />
                         </RelativeLayout>
 
                         <View
                             android:id="@+id/audioSectionDivider"
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
-                            android:background="?android:attr/listDivider"
                             android:layout_margin="5dp"
                             android:layout_marginStart="5dp"
-                            android:layout_marginEnd="5dp"/>
+                            android:layout_marginEnd="5dp"
+                            android:background="?android:attr/listDivider" />
 
                         <RelativeLayout
                             android:id="@+id/popupAudioRL"
@@ -140,7 +141,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
-                                android:text="No audio available" />
+                                android:text="No audio available"
+                                android:textStyle="italic" />
                         </RelativeLayout>
                     </LinearLayout>
                 </ScrollView>

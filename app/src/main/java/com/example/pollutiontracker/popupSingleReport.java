@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -13,6 +14,7 @@ import com.smarteist.autoimageslider.SliderView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import static android.view.View.GONE;
 
@@ -43,13 +45,20 @@ public class popupSingleReport extends Activity {
         else {return;}
 
         //Analyzing the received report and making summary
-        reportStat = "Address: "+report.address+"\n"
+        String latitude = String.format(Locale.getDefault(), "%.3f", report.location.latitude);
+        String longitude = String.format(Locale.getDefault(), "%.3f", report.location.longitude);
+        /*reportStat = "Address: "+report.address+"\n"
                 +"Location: "+report.location.latitude+", "+report.location.longitude+"\n"
                 +"Pollution type: "+report.category+"\n"
                 +"Source: "+report.source+"\n"
                 +"Extent: "+report.extent;
-        popupSummaryTV.setText(reportStat);
-
+        popupSummaryTV.setText(reportStat);*/
+        reportStat = "Address: "+report.address+"<br>"
+                +"Location: "+latitude+", "+longitude+"<br>"
+                +"Pollution type: "+ "<i>" +report.category+ "</i>" +"<br>"
+                +"Source: "+ "<i>" +report.source+ "</i>" + "<br>"
+                +"Extent: "+ "<i>" +report.extent+ "</i>" ;
+        popupSummaryTV.setText(Html.fromHtml(reportStat));
 
         //Populating the image slider
         if (report.imagesUrl!=null) {
@@ -59,7 +68,9 @@ public class popupSingleReport extends Activity {
             sliderView.setSliderAdapter(adapter);
 
             images.addAll(report.imagesUrl);
-            imgDescriptions.add(report.address);
+            for (int i=0; i<report.imagesUrl.size(); i++) {
+                imgDescriptions.add(report.address);
+            }
             adapter.setItems(images, imgDescriptions);
             adapter.notifyDataSetChanged();
             noImgMessageTV.setVisibility(GONE);

@@ -4,11 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
     tools:context=".popupGraph">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -16,7 +18,8 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent">
 
             <ScrollView
                 android:layout_width="match_parent"
@@ -30,7 +33,8 @@
                     <RelativeLayout
                         android:id="@+id/popupGraphRL"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent">
 
                         <androidx.cardview.widget.CardView
                             android:layout_width="match_parent"
@@ -52,7 +56,8 @@
                     <RelativeLayout
                         android:id="@+id/popupSummaryRL"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent">
 
                         <androidx.cardview.widget.CardView
                             android:layout_width="match_parent"

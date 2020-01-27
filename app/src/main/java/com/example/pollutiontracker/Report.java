@@ -10,7 +10,7 @@ public class Report implements Serializable {
     public String address;
     public String category, source, extent;
     public ArrayList<String> imagesUrl;
-    public ArrayList<String> audiosUrl;
+    public String audiosUrl;
 
     public Report(){}
 
@@ -39,9 +39,9 @@ public class Report implements Serializable {
     }
 
     //Constructor for reports having audio contents but no image content
-    public Report( ArrayList<String> audiosUrl,
-                   mLatLng location, String postedAt, String address,
-                   String category, String source, String extent ) {
+    public Report( mLatLng location, String postedAt, String address,
+                   String category, String source, String extent ,
+                   String audiosUrl) {
         this.location = location;
         this.postedAt = postedAt;
         this.address = address;
@@ -54,7 +54,7 @@ public class Report implements Serializable {
     //Constructor for reports having both image and audio contents
     public Report(mLatLng location, String postedAt, String address,
                   String category, String source, String extent,
-                  ArrayList<String> imagesUrl,  ArrayList<String> audiosUrl ) {
+                  ArrayList<String> imagesUrl, String audiosUrl ) {
         this.location = location;
         this.postedAt = postedAt;
         this.address = address;

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PollutionTracker</string>
+    <string name="app_name">WeFix</string>
 
     <!--pollutedLocsMapActivity.java-->
     <!--Pollution types-->
