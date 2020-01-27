@@ -3,8 +3,10 @@ package com.example.pollutiontracker;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 
 import com.smarteist.autoimageslider.SliderView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -27,6 +30,8 @@ public class popupSingleReport extends Activity {
     ImageButton closePopupSingleSummaryIB;
 
     Report report; String reportStat;
+
+    MediaPlayer player; ImageButton popupPlayAudioIB, popupStopAudioIB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +101,57 @@ public class popupSingleReport extends Activity {
         });
     }
 
+
+    /*
+     *
+     * Dealing with audio
+     * */
+    private void playAudio() {
+        player = new MediaPlayer();
+        try {
+            player.setDataSource(report.audiosUrl);
+            player.prepare();
+
+            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    player.start();
+                    if (player.isPlaying()){
+                        popupPlayAudioIB.setVisibility(GONE);
+                        popupStopAudioIB.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    popupPlayAudioIB.setVisibility(View.VISIBLE);
+                    popupStopAudioIB.setVisibility(GONE);
+                }
+            });
+            player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                    toaster.shortToast("Sorry couldn't play requested audio", popupSingleReport.this);
+                    return false;
+                }
+            });
+
+
+        } catch (IOException e) {
+            Log.e("AUDIO_PLAY_ERROR", "prepare() failed");
+        }
+    }
+
+    private void stopAudio() {
+        if (player.isPlaying()&& player!=null) {
+            player.release();
+            player = null;
+            popupPlayAudioIB.setVisibility(View.VISIBLE);
+            popupStopAudioIB.setVisibility(GONE);
+        }
+    }
+
     private void initViews(){
         popupSummaryTV = findViewById(R.id.popupSummaryTV);
 
@@ -109,6 +165,22 @@ public class popupSingleReport extends Activity {
         popupAudioFL.setVisibility(GONE);
         noAudioMessageTV = findViewById(R.id.noAudioMessageTV);
         noAudioMessageTV.setVisibility(GONE);
+
+        popupPlayAudioIB = findViewById(R.id.popupPlayAudioIB);
+        popupPlayAudioIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                playAudio();
+            }
+        });
+        popupStopAudioIB = findViewById(R.id.popupStopAudioIB);
+        popupStopAudioIB.setVisibility(GONE);
+        popupStopAudioIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopAudio();
+            }
+        });
 
         closePopupSingleSummaryIB = findViewById(R.id.closePopupSingleSummaryIB);
     }

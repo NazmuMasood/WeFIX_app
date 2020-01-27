@@ -88,6 +88,7 @@ import cafe.adriel.androidaudiorecorder.model.AudioSource;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+import static android.view.View.GONE;
 
 public class formActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,
         View.OnLongClickListener,
@@ -131,7 +132,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
     ImageButton audioChooserIB, playAudioIB, stopAudioIB, resetAudioIB, removeAudioIB;
     final static int TAG_CODE_PERMISSION_AUDIO = 111;
     final static int REQUEST_AUDIO_CAPTURE = 3;
-    String audioFilePath; String audiosURL;
+    String audioFilePath, audioFile;
+    String audiosUrl;
     MediaPlayer player;
 
     @Override
@@ -250,6 +252,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
         stopAudioIB = findViewById(R.id.stopAudioIB);
+        stopAudioIB.setVisibility(GONE);
         stopAudioIB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -283,7 +286,31 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         try {
             player.setDataSource(audioFilePath);
             player.prepare();
-            player.start();
+
+            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    player.start();
+                    if (player.isPlaying()){
+                        playAudioIB.setVisibility(GONE);
+                        stopAudioIB.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    playAudioIB.setVisibility(View.VISIBLE);
+                    stopAudioIB.setVisibility(GONE);
+                }
+            });
+            player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                    toaster.shortToast("Sorry couldn't play requested audio", formActivity.this);
+                    return false;
+                }
+            });
         } catch (IOException e) {
             Log.e("AUDIO_PLAY_ERROR", "prepare() failed");
         }
@@ -293,12 +320,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         if (player.isPlaying()&& player!=null) {
             player.release();
             player = null;
+            playAudioIB.setVisibility(View.VISIBLE);
+            stopAudioIB.setVisibility(GONE);
         }
     }
 
     private void resetAudio() {
         stopAudio();
-        audioFilePath = null;
+        //audioFile = null; audioFilePath = null;
         chooseAudio();
     }
 
@@ -306,12 +335,12 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         stopAudio();
         audioChooserRL.setVisibility(View.VISIBLE);
         audioPlayerRL.setVisibility(View.GONE);
-        audioFilePath = null;
+        audioFile = null; audioFilePath = null;
     }
 
     private void chooseAudio() {
-        audioFilePath = getExternalFilesDir(Environment.DIRECTORY_MUSIC) + "/AUDIO_"
-                                    + System.currentTimeMillis() +".wav";
+        audioFile = "AUDIO_"+ System.currentTimeMillis();
+        audioFilePath = getExternalFilesDir(Environment.DIRECTORY_MUSIC) +"/"+ audioFile +".wav";
         int color = ContextCompat.getColor(this, R.color.colorPrimary);
         AndroidAudioRecorder.with(this)
                 // Required
@@ -330,6 +359,23 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 .record();
     }
 
+    private Uri getAudioUri(){
+        try {
+            /*File audio = File.createTempFile(
+                    audioFile,   //prefix
+                    ".wav",          //suffix
+                    getExternalFilesDir(Environment.DIRECTORY_MUSIC)       //directory
+            );
+            Uri audioUri = FileProvider.getUriForFile(this,
+                    "com.example.pollutiontracker.fileprovider",
+                    audio);
+            this.grantUriPermission(getPackageName(), audioUri,
+                    FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);*/
+            Uri audioUri  = Uri.fromFile(new File(audioFilePath));
+            return audioUri;
+        }catch (Exception e){e.printStackTrace();}
+        return null;
+    }
 
     /*
      *
@@ -371,17 +417,17 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             toaster.shortToast("No internet connection. Please try again...", formActivity.this);
             return;
         }
-        //if no image has been selected
-        if (images.isEmpty()){
-            handleReportUpload(null);
+        //if no image and no audio has been selected
+        if (images.isEmpty()&& audioFile == null){
+            handleReportUpload(null, null);
         }
         //if image(s) has been selected
         else {
-            handleImgUpload();
+            handleFileUpload();
         }
     }
 
-    private void handleReportUpload(ArrayList<String> imagesUrl){
+    private void handleReportUpload(ArrayList<String> imagesUrl, String audiosUrl){
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference reportsRef = database.getReference("pollution-tracker/reports");
         final DatabaseReference geoFireRef = FirebaseDatabase.getInstance().getReference("pollution-tracker/geofire");
@@ -400,8 +446,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         //LatLng rajshahi = new LatLng(24.367350, 88.636055);
         //Map<String, LatLng> atLoc = new HashMap<>();
         //atLoc.put("location", rajshahi);
+
         Report report;
-        if (imagesUrl==null) {
+        /*if (imagesUrl==null) {
             report = new Report(
                     mLatLng,
                     timeStamp,
@@ -410,8 +457,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     sourceSpinner.getSelectedItem().toString(),
                     extentSpinner.getSelectedItem().toString()
             );
-        }
-        else {
+        }*/
+        //else {
             report = new Report(
                     mLatLng,
                     timeStamp,
@@ -419,12 +466,14 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     categorySpinner.getSelectedItem().toString(),
                     sourceSpinner.getSelectedItem().toString(),
                     extentSpinner.getSelectedItem().toString(),
-                    imagesUrl
+                    imagesUrl,
+                    audiosUrl
             );
-        }
+        //}
         //reports.put(timeStamp, report);
         //reports.add(report);
 
+        //Log.d("Report", report.imagesUrl.get(0));
         final String reportId = reportsRef.push().getKey();
         reportsRef.child(reportId).setValue(report).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -456,7 +505,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         });
     }
 
-    private void handleImgUpload() {
+    private void handleFileUpload() {
         /*
          *Uploading the images first to firebase storage, one-by-one
          */
@@ -476,6 +525,47 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             Log.d("imagesUri", uri.toString());
         }*/
 
+        //audio upload
+        if (audioFile!=null) {
+            final Uri audioUri = getAudioUri();
+            if (audioUri!=null) {
+                /*mProgressTV.setText(audioUri.toString());
+                return;*/
+                final StorageReference audiosRef = storageRef.child("audios/"
+                        + audioFile + "_" + System.currentTimeMillis()
+                );
+                UploadTask uploadTaskAudio = audiosRef.putFile(audioUri);
+                uploadTasks.add(uploadTaskAudio);
+                uploadTaskAudio.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        toaster.shortToast("Upload failed: " + audioUri.getLastPathSegment() + " -" + exception.getMessage(), formActivity.this);
+
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                        Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                        while (!uriTask.isComplete()) ;
+                        Uri downloadUri = uriTask.getResult();
+                        audiosUrl = downloadUri.toString();
+                        mProgressTV.setText("Upload success: " + audioUri.getLastPathSegment());
+                        Log.d("onSuccess", "An audio just uploaded..url:" + downloadUri.toString());
+                    }
+                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        mProgressTV.setText("Uploading " + audioUri.getLastPathSegment() + ": " + (int) progress + "%");
+                    }
+                });
+            }
+            else {toaster.shortToast("Couldn't upload audio", formActivity.this);}
+        }
+
+        //image upload
         //for (final Uri file : imagesUri){
         for (final LinkedHashMap.Entry<String, Uri> entry : images.entrySet()) {
             try {
@@ -493,7 +583,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
 
                 UploadTask uploadTask;
 
-                if (imagesIntentType.get(file)==1) { //Compressing image if intent "Gallery"
+                /*if (imagesIntentType.get(file)==1) { //Compressing image if intent "Gallery"
                     //Bitmap bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), file);
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inSampleSize = 8;
@@ -515,9 +605,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     byte[] data = baos.toByteArray();
 
                     uploadTask = imagesRef.putBytes(data);
-                }else {
+                }else {*/
                     uploadTask = imagesRef.putFile(file);
-                }
+                //}
                 uploadTasks.add(uploadTask);
 
                 // Register observers to listen for when the download is done or if it fails
@@ -556,16 +646,16 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         allTasks.addOnSuccessListener(new OnSuccessListener() {
             @Override
             public void onSuccess(Object o) {
-                toaster.shortToast("All images were uploaded", formActivity.this);
+                //toaster.shortToast("All files were uploaded", formActivity.this);
                 mProgressBar.setVisibility(View.GONE);
                 mProgressTV.setVisibility(View.GONE);
                 //for (String s : imagesUrl){Log.d("imagesUrl", s);}
-                handleReportUpload(imagesUrl);
+                handleReportUpload(imagesUrl, audiosUrl);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                toaster.shortToast("Some images weren't uploaded", formActivity.this);
+                toaster.shortToast("Some files weren't uploaded", formActivity.this);
             }
         });
     }
@@ -631,9 +721,9 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             if (resultCode == RESULT_OK) {
                 audioChooserRL.setVisibility(View.GONE);
                 audioPlayerRL.setVisibility(View.VISIBLE);
-
             } else if (resultCode == RESULT_CANCELED) {
                 // Oops! User has canceled the recording
+                audioFile = null; audioFilePath = null;
             }
         }
 

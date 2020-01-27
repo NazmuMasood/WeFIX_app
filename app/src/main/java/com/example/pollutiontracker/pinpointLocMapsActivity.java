@@ -344,7 +344,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
         switch (resultCode) {
             case Activity.RESULT_OK:
                 // All required changes were successfully made
-                toast("GPS enabled");
+                //toast("GPS enabled");
 
                 userHandledFirstGpsPrompt = true;
 
@@ -352,7 +352,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 break;
             case Activity.RESULT_CANCELED:
                 // The user was asked to change settings, but chose not to
-                toast("GPS denied");
+                //toast("GPS denied");
 
                 //Very first time when activity starts and user cancels turn-on-gps prompt
                 if (!userHandledFirstGpsPrompt) {
@@ -366,7 +366,7 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                                     moveToGPSLocation();
                                     handleLocLoadFinished();
                                 } else { //No last location available
-                                    toast("Custom location");
+                                    //toast("Custom location");
                                     LatLng shaplaChottorLatLng = new LatLng(23.726623, 90.421576);
 
                                     Location temp = new Location(LocationManager.GPS_PROVIDER);

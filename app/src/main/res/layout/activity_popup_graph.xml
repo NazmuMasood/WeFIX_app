@@ -85,7 +85,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:background="@drawable/places_ic_clear"
-            android:padding="10dp" />
+            android:padding="18dp" />
 
     </RelativeLayout>
 

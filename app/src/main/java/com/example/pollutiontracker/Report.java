@@ -1,5 +1,7 @@
 package com.example.pollutiontracker;
 
+import androidx.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
@@ -9,7 +11,9 @@ public class Report implements Serializable {
     public String postedAt;
     public String address;
     public String category, source, extent;
+    @Nullable
     public ArrayList<String> imagesUrl;
+    @Nullable
     public String audiosUrl;
 
     public Report(){}
