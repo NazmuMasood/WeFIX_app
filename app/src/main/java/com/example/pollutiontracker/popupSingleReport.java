@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.smarteist.autoimageslider.SliderView;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.view.View.GONE;
 
@@ -32,6 +35,7 @@ public class popupSingleReport extends Activity {
     Report report; String reportStat;
 
     MediaPlayer player; ImageButton popupPlayAudioIB, popupStopAudioIB;
+    ProgressBar audioLoadingPB; Timer mTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +111,8 @@ public class popupSingleReport extends Activity {
      * Dealing with audio
      * */
     private void playAudio() {
+        //audioLoadingPB.setVisibility(View.VISIBLE);
+        //audioLoadingPB.setIndeterminate(true);
         player = new MediaPlayer();
         try {
             player.setDataSource(report.audiosUrl);
@@ -119,7 +125,39 @@ public class popupSingleReport extends Activity {
                     if (player.isPlaying()){
                         popupPlayAudioIB.setVisibility(GONE);
                         popupStopAudioIB.setVisibility(View.VISIBLE);
+                        audioLoadingPB.setVisibility(View.VISIBLE);
+                        audioLoadingPB.setProgress(0);
+
+                        final double duration = player.getDuration();
+                        /*final int totalDivisions = player.getDuration()/1000;
+                        final int amountToUpdate = 100 / totalDivisions;*/
+                        mTimer = new Timer();
+                        mTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                runOnUiThread(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        if (player!=null && player.isPlaying()) {
+                                            double currentPos = player.getCurrentPosition();
+                                            double currentProgressDouble = ( currentPos/ duration) * 100;
+                                            int currentProgress = (int)currentProgressDouble;
+                                            audioLoadingPB.setProgress(currentProgress);
+                                            //toaster.shortToast("Progress: "+currentProgress+"- "+currentProgressDouble+"- "+currentPos+"- "+duration, getApplicationContext());
+                                            /*int p = audioLoadingPB.getProgress();
+                                            if (p<100){
+                                                audioLoadingPB.setProgress(p+amountToUpdate);
+                                                toaster.shortToast("AmntToUpdt-"+amountToUpdate+", getProg"+p,
+                                                        getApplicationContext());
+                                            }*/
+                                        }
+                                    }
+                                });
+                            }
+                        }, 0, 1000);
                     }
+
                 }
             });
             player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -127,12 +165,17 @@ public class popupSingleReport extends Activity {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     popupPlayAudioIB.setVisibility(View.VISIBLE);
                     popupStopAudioIB.setVisibility(GONE);
+                    audioLoadingPB.setVisibility(GONE);
+                    if (mTimer!=null) {
+                        mTimer.cancel();
+                    }
                 }
             });
             player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
                     toaster.shortToast("Sorry couldn't play requested audio", popupSingleReport.this);
+                    audioLoadingPB.setVisibility(GONE);
                     return false;
                 }
             });
@@ -149,6 +192,10 @@ public class popupSingleReport extends Activity {
             player = null;
             popupPlayAudioIB.setVisibility(View.VISIBLE);
             popupStopAudioIB.setVisibility(GONE);
+            audioLoadingPB.setVisibility(GONE);
+            if (mTimer!=null) {
+                mTimer.cancel();
+            }
         }
     }
 
@@ -165,6 +212,8 @@ public class popupSingleReport extends Activity {
         popupAudioFL.setVisibility(GONE);
         noAudioMessageTV = findViewById(R.id.noAudioMessageTV);
         noAudioMessageTV.setVisibility(GONE);
+        audioLoadingPB = findViewById(R.id.audioLoadingPB);
+        audioLoadingPB.setVisibility(GONE);
 
         popupPlayAudioIB = findViewById(R.id.popupPlayAudioIB);
         popupPlayAudioIB.setOnClickListener(new View.OnClickListener() {
