@@ -3,6 +3,7 @@ package com.example.pollutiontracker;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.Html;
@@ -111,12 +112,17 @@ public class popupSingleReport extends Activity {
      * Dealing with audio
      * */
     private void playAudio() {
-        //audioLoadingPB.setVisibility(View.VISIBLE);
-        //audioLoadingPB.setIndeterminate(true);
+        audioLoadingPB.setVisibility(View.VISIBLE);
+        audioLoadingPB.setIndeterminate(true);
+
         player = new MediaPlayer();
+        player.setAudioAttributes( new AudioAttributes
+                .Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build());
         try {
             player.setDataSource(report.audiosUrl);
-            player.prepare();
+            player.prepareAsync();
 
             player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -125,7 +131,7 @@ public class popupSingleReport extends Activity {
                     if (player.isPlaying()){
                         popupPlayAudioIB.setVisibility(GONE);
                         popupStopAudioIB.setVisibility(View.VISIBLE);
-                        audioLoadingPB.setVisibility(View.VISIBLE);
+                        audioLoadingPB.setIndeterminate(false);
                         audioLoadingPB.setProgress(0);
 
                         final double duration = player.getDuration();
@@ -183,6 +189,7 @@ public class popupSingleReport extends Activity {
 
         } catch (IOException e) {
             Log.e("AUDIO_PLAY_ERROR", "prepare() failed");
+            toaster.longToast("Sorry the audio file doesn't exist anymore", getApplicationContext());
         }
     }
 

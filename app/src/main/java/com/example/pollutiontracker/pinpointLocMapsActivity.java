@@ -115,6 +115,9 @@ public class pinpointLocMapsActivity extends FragmentActivity implements
                 if (tooZoomedOut){
                     mMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
                 }
+                else if (locationET.getText()==null){
+                    toaster.longToast("Location unavailable. Please set pointer again...", getApplicationContext());
+                }
                 else {
                     /*toaster.shortToast("Confirmed location!\n"
                             +markerLoc.getLatitude()+", "+markerLoc.getLongitude()

@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioAttributes;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -283,6 +284,10 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
      * */
     private void playAudio() {
         player = new MediaPlayer();
+        player.setAudioAttributes( new AudioAttributes
+                .Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build());
         try {
             player.setDataSource(audioFilePath);
             player.prepare();
@@ -313,6 +318,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             });
         } catch (IOException e) {
             Log.e("AUDIO_PLAY_ERROR", "prepare() failed");
+            toaster.shortToast("Sorry the audio file doesn't exist anymore", getApplicationContext());
         }
     }
 
