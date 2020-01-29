@@ -86,6 +86,7 @@ import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
 import cafe.adriel.androidaudiorecorder.model.AudioChannel;
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
 import cafe.adriel.androidaudiorecorder.model.AudioSource;
+import id.zelory.compressor.Compressor;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -521,7 +522,6 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         final ArrayList<UploadTask> uploadTasks = new ArrayList<>();
         mProgressBar.setVisibility(View.VISIBLE);
         mProgressTV.setVisibility(View.VISIBLE);
-        mProgressBar.setProgress(0);
 
         /*for(LinkedHashMap.Entry<String, Uri> entry : images.entrySet()){
             imagesUri.add(entry.getValue());
@@ -537,6 +537,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
             if (audioUri!=null) {
                 /*mProgressTV.setText(audioUri.toString());
                 return;*/
+                mProgressBar.setProgress(0);
                 final StorageReference audiosRef = storageRef.child("audios/"
                         + audioFile + "_" + System.currentTimeMillis()
                 );
@@ -564,7 +565,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     @Override
                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                         double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                        mProgressTV.setText("Uploading " + audioUri.getLastPathSegment() + ": " + (int) progress + "%");
+                        mProgressTV.setText("Uploading audio: " + audioUri.getLastPathSegment() /*+ ": " + (int) progress + "%"*/);
+                        mProgressBar.setProgress((int)progress);
                     }
                 });
             }
@@ -574,6 +576,7 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
         //image upload
         //for (final Uri file : imagesUri){
         for (final LinkedHashMap.Entry<String, Uri> entry : images.entrySet()) {
+            mProgressBar.setProgress(0);
             try {
                 final Uri file = entry.getValue();
                 String imageTypePath;
@@ -639,7 +642,8 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                     @Override
                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                         double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                        mProgressTV.setText("Uploading " + file.getLastPathSegment() + ": " + (int) progress + "%");
+                        mProgressTV.setText("Uploading image: " + file.getLastPathSegment() /*+ ": " + (int) progress + "%"*/);
+                        mProgressBar.setProgress((int)progress);
                     }
                 });
 
@@ -759,6 +763,17 @@ public class formActivity extends AppCompatActivity implements AdapterView.OnIte
                 fos.flush();
                 fos.close();
                 }catch (Exception e){e.printStackTrace();}
+
+                //Custom compressor library
+                /*File compressedImageFile = new Compressor(this)
+                        .setMaxWidth(1024)
+                        .setMaxHeight(768)
+                        .setQuality(75)
+                        .setCompressFormat(Bitmap.CompressFormat.WEBP)
+                        .setDestinationDirectoryPath(getExternalFilesDir(
+                                Environment.DIRECTORY_PICTURES).getAbsolutePath())
+                        .compressToFile();*/
+
                 //also store the intent type (gallery/image) of each image to a map
                 imagesIntentType.put(mImageUri, 0);//0 means its camera intent
 

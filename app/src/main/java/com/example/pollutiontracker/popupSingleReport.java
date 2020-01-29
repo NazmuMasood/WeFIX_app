@@ -57,17 +57,14 @@ public class popupSingleReport extends Activity {
         //Analyzing the received report and making summary
         String latitude = String.format(Locale.getDefault(), "%.3f", report.location.latitude);
         String longitude = String.format(Locale.getDefault(), "%.3f", report.location.longitude);
-        /*reportStat = "Address: "+report.address+"\n"
-                +"Location: "+report.location.latitude+", "+report.location.longitude+"\n"
-                +"Pollution type: "+report.category+"\n"
-                +"Source: "+report.source+"\n"
-                +"Extent: "+report.extent;
-        popupSummaryTV.setText(reportStat);*/
-        reportStat = "Address: "+report.address+"<br>"
-                +"Location: "+latitude+", "+longitude+"<br>"
-                +"Pollution type: "+ "<i>" +report.category+ "</i>" +"<br>"
-                +"Source: "+ "<i>" +report.source+ "</i>" + "<br>"
-                +"Extent: "+ "<i>" +report.extent+ "</i>" ;
+        reportStat = "<u>Pollution type</u>: "+ "<i>" +report.category+ "</i>" +"<br>"
+                +"<u>Source</u>: "+ "<i>" +report.source+ "</i>" + "<br>"
+                +"<u>Extent</u>: "+ "<i>" +report.extent+ "</i>" +"<br>"
+                +"<u>Location</u>: "+latitude+", "+longitude
+        ;
+        if (report.imagesUrl==null){
+            reportStat = reportStat+ "<br><u>Address</u>: "+report.address;
+        }
         popupSummaryTV.setText(Html.fromHtml(reportStat));
 
         //Populating the image slider
