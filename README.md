@@ -2,4 +2,4 @@
 
 ## Screenshots
 
-![What is this](./wefixappscreenshots/home.png)
+![What is this](./wefixappss/home.png)
