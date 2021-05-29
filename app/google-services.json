@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "329407945271",
+    "firebase_url": "https://pollutiontracker-9c870.firebaseio.com",
+    "project_id": "pollutiontracker-9c870",
+    "storage_bucket": "pollutiontracker-9c870.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329407945271:android:9b44bddfb0374992d4bdb2",
+        "android_client_info": {
+          "package_name": "com.example.pollutiontracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "329407945271-618fr3hk9uo34n55802u3sn22heposh1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pollutiontracker",
+            "certificate_hash": "069da2a5c887481d243bd5a94a2e5c2147709919"
+          }
+        },
+        {
+          "client_id": "329407945271-o4mmj4phamkd4la3odadpk2tdp06vug0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHRNQny7v96-dKkc5YHFETwRu8BcqdgF8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329407945271-o4mmj4phamkd4la3odadpk2tdp06vug0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
