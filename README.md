@@ -18,7 +18,7 @@
 <img src="./wefixappss/graph.png" height="400">
 </p>
 
-* ## ___Submit pollution reports, pinpoint exact locations and upload multiple media files___
+* ## ___Submit pollution reports, pinpoint exact locations and upload media files___
 <p float="left">
 <img src="./wefixappss/pollution_form.png" height="400">
 <img src="./wefixappss/pinpoint_location.png" height="400">
